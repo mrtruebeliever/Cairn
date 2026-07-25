@@ -28,7 +28,12 @@ During a session: **SELECT** pauses, **BACK** asks to stop.
 - **Session lengths** of 1, 2, 3, 5, 10 or 15 minutes.
 - **The tide is the guide:** the waterline rises through the inhale and falls
   through the exhale, with the phase name and a countdown above it. Optional
-  haptic pulses on every phase change and soft tones at four volume levels.
+  haptic pulses on every phase change and, at four volume levels, sound that is
+  synthesised rather than beeped: a wave breaking when the app opens, and a
+  swell that rises and falls with the breath. Every cue is generated sample by
+  sample (`src/c/sfx_synth.c`) so it can start from silence and fade away
+  instead of clicking on and off; `tools/test/preview_sfx.sh` renders them all
+  to WAV files you can listen to without a watch.
 - **Live heart rate.** Cairn asks the sensor for a reading every second and
   waits on a short priming screen at the start, so the opening heart rate is a
   real baseline rather than a stale number.

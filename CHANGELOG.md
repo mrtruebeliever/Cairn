@@ -9,7 +9,14 @@
   Custom rhythm adjustable in half-second steps on the watch or from the phone.
   Session lengths of 1, 2, 3, 5, 10 or 15 minutes.
 - **Guidance:** phase name and countdown above the water, optional haptic pulses
-  on every phase change, and optional tones at four volume levels.
+  on every phase change, and optional sound at four volume levels.
+- **Generated audio.** Every cue is synthesised as raw PCM rather than played as
+  notes, because a note restarts its waveform at full amplitude and that click
+  is what makes a short beep sound harsh. Filtered noise makes the surf: a wave
+  breaks when the app opens, a swell rises with the inhale and draws back on the
+  exhale, and the chimes are struck bells with a real decay. Nothing is stored —
+  it costs no resources — and `tools/test/preview_sfx.sh` renders the lot to WAV
+  for listening on a PC, since the emulator has no speaker.
 - **Heart rate:** the sensor is asked for a reading every second while the app
   is open, and a short priming screen at the start waits for a first reading so
   the opening heart rate is a real baseline. SELECT skips it.

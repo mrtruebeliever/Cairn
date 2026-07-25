@@ -16,6 +16,8 @@
 #include "i18n.h"
 #include "session.h"
 #include "settings.h"
+#include "sfx.h"
+#include "sfx_synth.h"
 #include "stats.h"
 
 // Left to itself the watch samples the heart rate on its own schedule — minutes
@@ -34,9 +36,13 @@ static void init(void) {
   hr_sampling_apply();
   backlight_apply();
   home_window_push();
+  cue_app_open();
 }
 
 static void deinit(void) {
+  // Before anything else: the synth feeds the speaker from a timer, and that
+  // timer must not outlive the app.
+  synth_stop();
   health_service_events_unsubscribe();
   health_service_set_heart_rate_sample_period(0);
   backlight_release();
