@@ -10,9 +10,8 @@ A guided breathing coach with live heart rate. Inhale and the water rises, exhal
 Cairn turns a breathing exercise into a tide. Start a session and the waterline
 rises while you inhale and falls while you exhale, uncovering a cairn of stones
 on the shore — no counting, no timer to stare at, just a rhythm to follow. A
-pulse on your wrist marks every phase change, and if you want sound, the watch
-makes waves: one breaks as the app opens, and a soft swell rises and falls with
-your breathing. No beeps.
+pulse on your wrist marks every phase change, and if you want sound, a soft tone
+swells upward as you breathe in and settles as you breathe out.
 
 While you breathe, the watch reads your heart rate every second. Afterwards you
 get a calm score out of 100 built from three things: how much of the session you
@@ -41,8 +40,8 @@ FEATURES
 • A growing cairn, six badges, a personal best and your last 20 sessions.
 • 7- and 30-day trends for calm score and resting heart rate, plus a coaching
   line.
-• Haptic pulses and optional generated surf and chimes at four volume levels;
-  backlight, vibration and heart-rate display all switchable.
+• Haptic pulses and optional soft tones at four volume levels; backlight,
+  vibration and heart-rate display all switchable.
 • Settings on the watch or from the phone (Clay).
 • Made for the Pebble Time 2 (Emery) colour screen; works without the phone.
 • Available in English, Nederlands, Français, Deutsch and Español, following

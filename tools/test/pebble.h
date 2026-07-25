@@ -45,23 +45,3 @@ const char *i18n_get_system_locale(void);
 #define TRIG_MAX_RATIO 0xffff
 int32_t sin_lookup(int32_t angle);
 int32_t cos_lookup(int32_t angle);
-
-// --- timers & speaker --------------------------------------------------------
-// Enough of the surface for sfx_synth.c to compile on the host, so preview_sfx.c
-// can render the generated cues to WAV files and they can be judged without
-// flashing a watch. Nothing here plays audio.
-typedef struct AppTimer AppTimer;
-AppTimer *app_timer_register(uint32_t ms, void (*cb)(void *), void *data);
-bool app_timer_cancel(AppTimer *timer);
-
-typedef enum {
-  SpeakerPcmFormat_8kHz_8bit = 0,
-  SpeakerPcmFormat_16kHz_8bit = 1,
-  SpeakerPcmFormat_8kHz_16bit = 2,
-  SpeakerPcmFormat_16kHz_16bit = 3,
-} SpeakerPcmFormat;
-
-bool speaker_stream_open(SpeakerPcmFormat format, uint8_t volume);
-uint32_t speaker_stream_write(const void *data, uint32_t num_bytes);
-void speaker_stream_close(void);
-void speaker_stop(void);

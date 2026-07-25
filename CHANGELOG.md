@@ -10,13 +10,11 @@
   Session lengths of 1, 2, 3, 5, 10 or 15 minutes.
 - **Guidance:** phase name and countdown above the water, optional haptic pulses
   on every phase change, and optional sound at four volume levels.
-- **Generated audio.** Every cue is synthesised as raw PCM rather than played as
-  notes, because a note restarts its waveform at full amplitude and that click
-  is what makes a short beep sound harsh. Filtered noise makes the surf: a wave
-  breaks when the app opens, a swell rises with the inhale and draws back on the
-  exhale, and the chimes are struck bells with a real decay. Nothing is stored —
-  it costs no resources — and `tools/test/preview_sfx.sh` renders the lot to WAV
-  for listening on a PC, since the emulator has no speaker.
+- **Sound:** soft sine cues rather than beeps — a small chime when the app
+  opens, a swell that rises with the inhale and falls with the exhale, and a
+  resolve at the end. Each cue is a short phrase whose per-note velocities ramp
+  up and back down, which is what takes the edge off a note that would otherwise
+  start and stop at full volume.
 - **Heart rate:** the sensor is asked for a reading every second while the app
   is open, and a short priming screen at the start waits for a first reading so
   the opening heart rate is a real baseline. SELECT skips it.

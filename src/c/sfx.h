@@ -6,7 +6,7 @@
 // also what keeps the emulator alive — QEMU has no speaker and any playback
 // exits the app).
 
-// A wave breaking as the app opens. Silent unless Sound is on.
+// A small chime when the app opens. Silent unless Sound is on.
 void cue_app_open(void);
 
 void cue_phase_in(void);
