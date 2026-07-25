@@ -25,9 +25,13 @@ def configure(ctx):
     # CAIRN_MUTE=1 pebble build -> a build that never touches the speaker.
     # Sound defaults to Soft, and the emulator's QEMU has no speaker at all: the
     # app would exit on the chime it plays when it opens, leaving no way in.
-    if os.environ.get('CAIRN_MUTE'):
-        for env in ctx.all_envs.values():
-            env.append_value('DEFINES', 'CAIRN_MUTE')
+    # CAIRN_PHASE_TONES=1 puts the breathing tones back. They are off because
+    # playing them from the phase machine's timer callback froze a watch and
+    # restarted PebbleOS; this is here to run that experiment again, not to ship.
+    for flag in ('CAIRN_MUTE', 'CAIRN_PHASE_TONES'):
+        if os.environ.get(flag):
+            for env in ctx.all_envs.values():
+                env.append_value('DEFINES', flag)
 
 
 def build(ctx):

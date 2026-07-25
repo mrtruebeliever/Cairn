@@ -103,17 +103,31 @@ static const uint32_t VIB_HOLD[] = {25, 90, 25};
 static const uint32_t VIB_OUT[]  = {140};
 static const uint32_t VIB_DONE[] = {90, 120, 90, 120, 220};
 
-void cue_phase_in(void)   { vibe(VIB_IN,   SFX_N(VIB_IN));   play(SFX_IN,   SFX_N(SFX_IN)); }
-void cue_phase_hold(void) { vibe(VIB_HOLD, SFX_N(VIB_HOLD)); play(SFX_HOLD, SFX_N(SFX_HOLD)); }
-void cue_phase_out(void)  { vibe(VIB_OUT,  SFX_N(VIB_OUT));  play(SFX_OUT,  SFX_N(SFX_OUT)); }
+// The breathing phases are haptic only. Every speaker call that works is made
+// from init or from an event handler (a click, a window appearing); every one
+// that took the watch down — these phase cues, and the streamed version before
+// them — was made from an app-timer callback, which is where the phase machine
+// lives. Two watches' worth of evidence, one of them ending in factory mode, so
+// the tones are gone rather than re-tuned. Build with CAIRN_PHASE_TONES=1 to
+// put them back for another experiment; never ship that.
+#ifdef CAIRN_PHASE_TONES
+#define PHASE_PLAY(a) play(a, SFX_N(a))
+#else
+#define PHASE_PLAY(a) do { (void)(a); } while (0)
+#endif
+
+void cue_phase_in(void)   { vibe(VIB_IN,   SFX_N(VIB_IN));   PHASE_PLAY(SFX_IN); }
+void cue_phase_hold(void) { vibe(VIB_HOLD, SFX_N(VIB_HOLD)); PHASE_PLAY(SFX_HOLD); }
+void cue_phase_out(void)  { vibe(VIB_OUT,  SFX_N(VIB_OUT));  PHASE_PLAY(SFX_OUT); }
 
 // No vibration on open — the watch was just woken by hand.
 void cue_app_open(void) { play(SFX_OPEN, SFX_N(SFX_OPEN)); }
 
-void cue_session_done(void) {
-  vibe(VIB_DONE, SFX_N(VIB_DONE));
-  play(SFX_DONE, SFX_N(SFX_DONE));
-}
+// Fires from the session's timer, so it stays haptic; the chime that closes a
+// session is played by the result screen instead, as it appears.
+void cue_session_done(void) { vibe(VIB_DONE, SFX_N(VIB_DONE)); }
+
+void cue_result_chime(void) { play(SFX_DONE, SFX_N(SFX_DONE)); }
 
 void cue_badge(void) {
   if (g_set.haptics_on) vibes_double_pulse();

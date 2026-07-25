@@ -254,9 +254,10 @@ static void test_settings(void) {
   printf("settings\n");
   reset_all();
 
-  // Sound must default to Off: the emulator has no speaker and playback kills
-  // the app, so a fresh install has to be silent.
-  CHECK_EQ(g_set.sound_vol, 0, "sound defaults to Off");
+  // Sound defaults to Soft — the cues are guidance, not decoration, so a user
+  // who never opens Settings still hears them. (Emulator work uses a
+  // CAIRN_MUTE=1 build; QEMU has no speaker and exits on the first note.)
+  CHECK_EQ(g_set.sound_vol, 1, "sound defaults to Soft");
   CHECK_EQ(g_set.haptics_on, true, "haptics default on");
   CHECK_EQ(g_set.preset_idx, PRESET_COHERENT, "default preset");
   CHECK_EQ(settings_len_min(), 3, "default duration");

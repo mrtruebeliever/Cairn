@@ -28,9 +28,12 @@ During a session: **SELECT** pauses, **BACK** asks to stop.
 - **Session lengths** of 1, 2, 3, 5, 10 or 15 minutes.
 - **The tide is the guide:** the waterline rises through the inhale and falls
   through the exhale, with the phase name and a countdown above it. Optional
-  haptic pulses on every phase change and, at four volume levels, soft sine
-  cues: a small chime when the app opens, a swell that rises with the inhale and
-  falls with the exhale.
+  haptic pulses on every phase change — a nudge to breathe in, a double tick to
+  hold, a longer pull to breathe out — so the rhythm can be followed with your
+  eyes closed. Sound, at four volume levels, marks the app opening and the end
+  of a session; the breathing phases themselves are deliberately silent (see
+  `src/c/sfx.c`: playing them from the phase machine's timer callback restarted
+  PebbleOS on real hardware).
 - **Live heart rate.** Cairn asks the sensor for a reading every second and
   waits on a short priming screen at the start, so the opening heart rate is a
   real baseline rather than a stale number.

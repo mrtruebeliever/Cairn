@@ -228,7 +228,11 @@ static void res_appear(Window *window) {
   s_glow_ticks = 0;
   stop_anim();
   s_anim_timer = app_timer_register(GROW_MS, grow_tick, NULL);
+  // The sound for a finished session lands here rather than in the session's
+  // last tick: a window appearing is an event handler, and that is the only
+  // context this app is allowed to touch the speaker from (see sfx.c).
   if (s_badge_page >= 0) cue_badge();
+  else cue_result_chime();
 }
 
 void result_window_push(const SessionResult *res, uint32_t fresh_badges) {
