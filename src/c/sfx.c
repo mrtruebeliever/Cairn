@@ -65,15 +65,21 @@ static const uint8_t SND_VOL[4] = {0, 40, 70, 100};
 #define MAX_CUE_NOTES 8
 
 static void play(const SpeakerNote *notes, uint32_t count) {
+#ifdef CAIRN_MUTE
+  // Emulator builds (CAIRN_MUTE=1 pebble build): QEMU has no speaker and the
+  // app exits on the first note, which since Sound defaults to Soft would mean
+  // it exits the moment it opens. Nothing else changes.
+  (void)notes; (void)count; (void)SND_VOL;
+  return;
+#else
   uint8_t level = SND_VOL[g_set.sound_vol & 3];
   if (!level) return;
   if (count > MAX_CUE_NOTES) count = MAX_CUE_NOTES;
 
-  // Never stack a cue on top of one still playing: the phases are seconds
-  // apart, so this only ever fires when the Sound row is pressed repeatedly,
-  // and there the newest press is the one worth hearing.
-  if (speaker_get_status() != SpeakerStatusIdle) speaker_stop();
-
+  // Nothing else is touched: no speaker_get_status, no speaker_stop, no
+  // streaming. One watch has already restarted PebbleOS on this app's audio, so
+  // until sound is confirmed good on hardware this stays the single call that
+  // Polly ships (parrot_anim.c), and cues are short enough not to overlap.
   SpeakerNote scaled[MAX_CUE_NOTES];
   for (uint32_t i = 0; i < count; i++) {
     scaled[i] = notes[i];
@@ -81,6 +87,7 @@ static void play(const SpeakerNote *notes, uint32_t count) {
     scaled[i].velocity = (uint8_t)(v ? v : 1);   // 0 would mean "global volume"
   }
   speaker_play_notes(scaled, count, level);
+#endif
 }
 
 // Phase haptics differ per phase so the pattern is recognizable eyes-closed:

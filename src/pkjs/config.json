@@ -58,7 +58,7 @@
         "type": "select",
         "messageKey": "SOUND_VOL",
         "label": "Geluid",
-        "defaultValue": "0",
+        "defaultValue": "1",
         "options": [
           { "label": "Uit", "value": "0" },
           { "label": "Zacht", "value": "1" },

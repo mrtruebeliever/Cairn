@@ -38,8 +38,12 @@ void settings_load(void) {
 
   // Default Off: QEMU has no speaker and any playback kills the app, so the
   // emulator build must be silent until the user opts in on hardware.
-  g_set.sound_vol = read_int_or(PERSIST_SOUND_VOL, 0);
-  if (g_set.sound_vol < 0 || g_set.sound_vol > 3) g_set.sound_vol = 0;
+  // Soft by default: the cues are part of the guidance, and a first-time user
+  // who never opens Settings should hear them. (It was Off while the sound was
+  // being written, because the emulator has no speaker and exits on the first
+  // note — build with CAIRN_MUTE=1 for emulator work instead, see sfx.c.)
+  g_set.sound_vol = read_int_or(PERSIST_SOUND_VOL, 1);
+  if (g_set.sound_vol < 0 || g_set.sound_vol > 3) g_set.sound_vol = 1;
 
   g_set.haptics_on = persist_exists(PERSIST_HAPTICS_ON)
                        ? persist_read_bool(PERSIST_HAPTICS_ON) : true;
