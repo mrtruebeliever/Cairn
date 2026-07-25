@@ -1,0 +1,66 @@
+{
+  "name": "cairn",
+  "author": "mrtruebeliever",
+  "version": "1.0.0",
+  "license": "MIT",
+  "keywords": ["pebble-app"],
+  "private": true,
+  "dependencies": {
+    "pebble-clay": "^1.0.4"
+  },
+  "pebble": {
+    "displayName": "Cairn",
+    "uuid": "56a213b3-5060-463d-8222-380e0b104aa5",
+    "sdkVersion": "3",
+    "enableMultiJS": true,
+    "capabilities": [
+      "health",
+      "configurable"
+    ],
+    "targetPlatforms": [
+      "emery"
+    ],
+    "watchapp": {
+      "watchface": false
+    },
+    "messageKeys": [
+      "SETTINGS_PRESET",
+      "CUSTOM_IN",
+      "CUSTOM_HOLD1",
+      "CUSTOM_OUT",
+      "CUSTOM_HOLD2",
+      "SESSION_LEN",
+      "SOUND_VOL",
+      "HAPTICS_ON",
+      "SHOW_HR",
+      "ES_DATE",
+      "ES_DUR",
+      "ES_HRSTART",
+      "ES_HREND",
+      "ES_SCORE",
+      "ES_PRESET",
+      "ES_COMPLETION",
+      "TREND_REQ",
+      "RESET_ALL",
+      "TREND_SCORE_7",
+      "TREND_SCORE_30",
+      "TREND_HR_7",
+      "TREND_HR_30",
+      "TREND_STREAK",
+      "TREND_DIR",
+      "TREND_TIP",
+      "TREND_PRESET"
+    ],
+    "resources": {
+      "media": [
+        { "type": "png", "name": "IMG_MENU_ICON", "file": "images/menu_icon.png", "menuIcon": true },
+        { "type": "png", "name": "IMG_BADGE_0", "file": "images/badge_0.png" },
+        { "type": "png", "name": "IMG_BADGE_1", "file": "images/badge_1.png" },
+        { "type": "png", "name": "IMG_BADGE_2", "file": "images/badge_2.png" },
+        { "type": "png", "name": "IMG_BADGE_3", "file": "images/badge_3.png" },
+        { "type": "png", "name": "IMG_BADGE_4", "file": "images/badge_4.png" },
+        { "type": "png", "name": "IMG_BADGE_5", "file": "images/badge_5.png" }
+      ]
+    }
+  }
+}

@@ -1,0 +1,74 @@
+[
+  { "type": "heading", "defaultValue": "Cairn" },
+  {
+    "type": "text",
+    "defaultValue": "Alle instellingen kunnen ook op het horloge zelf: houd OMLAAG ingedrukt op het beginscherm."
+  },
+  {
+    "type": "section",
+    "items": [
+      { "type": "heading", "defaultValue": "Ademhaling" },
+      {
+        "type": "select",
+        "messageKey": "SETTINGS_PRESET",
+        "label": "Patroon",
+        "defaultValue": "0",
+        "options": [
+          { "label": "Coherent (5,5 in / 5,5 uit)", "value": "0" },
+          { "label": "Box (4-4-4-4)", "value": "1" },
+          { "label": "4-7-8", "value": "2" },
+          { "label": "Eigen ritme", "value": "3" }
+        ]
+      },
+      {
+        "type": "select",
+        "messageKey": "SESSION_LEN",
+        "label": "Sessieduur",
+        "defaultValue": "3",
+        "options": [
+          { "label": "1 minuut", "value": "1" },
+          { "label": "2 minuten", "value": "2" },
+          { "label": "3 minuten", "value": "3" },
+          { "label": "5 minuten", "value": "5" },
+          { "label": "10 minuten", "value": "10" },
+          { "label": "15 minuten", "value": "15" }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "section",
+    "items": [
+      { "type": "heading", "defaultValue": "Eigen ritme (seconden)" },
+      {
+        "type": "text",
+        "defaultValue": "Alleen gebruikt als het patroon op \"Eigen ritme\" staat. Op het horloge kun je ook halve seconden instellen."
+      },
+      { "type": "slider", "messageKey": "CUSTOM_IN", "label": "Inademen", "defaultValue": 4, "min": 2, "max": 12, "step": 1 },
+      { "type": "slider", "messageKey": "CUSTOM_HOLD1", "label": "Vasthouden (na in)", "defaultValue": 0, "min": 0, "max": 12, "step": 1 },
+      { "type": "slider", "messageKey": "CUSTOM_OUT", "label": "Uitademen", "defaultValue": 6, "min": 2, "max": 12, "step": 1 },
+      { "type": "slider", "messageKey": "CUSTOM_HOLD2", "label": "Vasthouden (na uit)", "defaultValue": 0, "min": 0, "max": 12, "step": 1 }
+    ]
+  },
+  {
+    "type": "section",
+    "items": [
+      { "type": "heading", "defaultValue": "Signalen" },
+      {
+        "type": "select",
+        "messageKey": "SOUND_VOL",
+        "label": "Geluid",
+        "defaultValue": "0",
+        "options": [
+          { "label": "Uit", "value": "0" },
+          { "label": "Zacht", "value": "1" },
+          { "label": "Normaal", "value": "2" },
+          { "label": "Luid", "value": "3" }
+        ]
+      },
+      { "type": "toggle", "messageKey": "HAPTICS_ON", "label": "Trilling bij fasewissel", "defaultValue": true },
+      { "type": "toggle", "messageKey": "SHOW_HR", "label": "Hartslag tonen", "defaultValue": true }
+    ]
+  },
+  { "type": "submit", "defaultValue": "Opslaan" }
+]

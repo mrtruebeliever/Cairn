@@ -1,0 +1,26 @@
+# Pebble build output
+build/
+*.pbw
+
+# Waf lock files (contain absolute paths / environment dumps)
+.lock-waf*
+
+# Dependencies
+node_modules/
+
+# Local Python venv used only for icon generation
+.art-venv/
+
+# Raw generator output (~23 MB of 2K PNGs). The derived, committed art is
+# resources/images/ and store/ — regenerate the sources from the briefs in
+# tools/CHATGPT_PROMPTS.md if they are ever needed again.
+tools/art/
+
+# Editor / OS cruft
+.DS_Store
+*.swp
+__pycache__/
+*.pyc
+
+# Local venv (a symlink here, so the trailing-slash rule misses it)
+.art-venv
