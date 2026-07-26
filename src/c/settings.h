@@ -6,8 +6,8 @@ typedef struct {
   uint8_t  preset_idx;    // PRESET_*
   uint16_t custom[4];     // in / hold1 / out / hold2, tenths of a second
   uint8_t  len_idx;       // index into SESSION_LENS
-  int8_t   sound_vol;     // 0=Off 1=Soft 2=Normal 3=Loud (default Off: the
-                          // emulator has no speaker and crashes on playback)
+  int8_t   sound_vol;     // 0=Off 1=Soft 2=Normal 3=Loud (default Soft; build
+                          // with CAIRN_MUTE=1 for emulator work, see sfx.c)
   bool     haptics_on;
   int8_t   bl_mode;       // BacklightMode
   bool     show_hr;

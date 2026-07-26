@@ -391,12 +391,6 @@ static void session_update(Layer *layer, GContext *ctx) {
   snprintf(buf, sizeof(buf), "%d:%02d", (int)(rem_s / 60), (int)(rem_s % 60));
   draw_center(ctx, buf, f18b, 62, 22, b, COL_DIM);
 
-  // Live heart rate. Shown even before the first reading lands, as an outline
-  // heart and a question mark, so the user can see it is still measuring.
-  if (g_set.show_hr && hr_accessible()) {
-    draw_hr_block(ctx, b, 82, f24b, 10);
-  }
-
   // The shore, the cairn standing on it, and then the tide painted over both —
   // that ordering is what submerges the stones as the level rises.
   // A fixed-height cairn, not the streak one: this is scenery whose only job is
@@ -413,6 +407,14 @@ static void session_update(Layer *layer, GContext *ctx) {
   draw_tide(ctx, b, surface, s_wave_phase, b.size.h);
   draw_cairn_underwater(ctx, GPoint(b.size.w / 2, WATER_LO), SCENE_STONES, 64,
                         g_stats.streak >= 7, tide_flat_y(surface));
+
+  // Live heart rate, drawn after the tide. Shown even before the first reading
+  // lands, as an outline heart and a question mark, so the user can see it is
+  // still measuring. Drawn last because at the top of an inhale the crest
+  // reaches the digits, and the readout has to win that overlap.
+  if (g_set.show_hr && hr_accessible()) {
+    draw_hr_block(ctx, b, 82, f24b, 10);
+  }
 
   if (s_paused && !s_confirm_stop) {
     GRect panel = GRect(6, 118, b.size.w - 12, 52);
@@ -432,7 +434,7 @@ static void session_update(Layer *layer, GContext *ctx) {
     graphics_context_set_stroke_color(ctx, COL_TEXT);
     graphics_draw_round_rect(ctx, panel, 6);
     draw_center(ctx, S(S_STOP_TITLE), f18b, 118, 24, b, COL_TEXT);
-    graphics_context_set_text_color(ctx, COL_DIM);
+    graphics_context_set_text_color(ctx, COL_TEXT);
     graphics_draw_text(ctx, S(S_STOP_HINT), f14, GRect(12, 140, b.size.w - 24, 36),
                        GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   }

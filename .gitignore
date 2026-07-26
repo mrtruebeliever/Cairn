@@ -24,3 +24,6 @@ __pycache__/
 
 # Local venv (a symlink here, so the trailing-slash rule misses it)
 .art-venv
+
+# Local agent working notes, not part of the project
+.claude/

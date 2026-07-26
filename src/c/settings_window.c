@@ -84,6 +84,13 @@ static bool row_value(int row, char *buf, size_t len) {
   }
 }
 
+// Whether a row draws a value column at all -- ROW_RESET does not, so its label
+// is free to use the full row width.
+static bool row_has_value(int row) {
+  char scratch[28];
+  return row_value(row, scratch, sizeof(scratch));
+}
+
 static void settings_update(Layer *layer, GContext *ctx) {
   GRect b = layer_get_bounds(layer);
   GFont f14  = fonts_get_system_font(FONT_KEY_GOTHIC_14);
@@ -108,34 +115,80 @@ static void settings_update(Layer *layer, GContext *ctx) {
       graphics_draw_round_rect(ctx, row, 4);
     }
 
-    // Armed reset turns the whole row into a red confirmation prompt.
+    // Armed reset turns the whole row into a red confirmation prompt. The red is
+    // the bar, not the text: red on the panel colour was the lowest-contrast
+    // pair on screen, in the one state that has to be read before it is pressed.
     if (i == ROW_RESET && s_reset_armed) {
-      graphics_context_set_text_color(ctx, GColorRed);
+      graphics_context_set_fill_color(ctx, GColorRed);
+      graphics_fill_rect(ctx, row, 4, GCornersAll);
+      graphics_context_set_stroke_color(ctx, COL_TEXT);
+      graphics_draw_round_rect(ctx, row, 4);
+      graphics_context_set_text_color(ctx, GColorWhite);
       graphics_draw_text(ctx, S(S_RESET_CONFIRM), f18,
                          GRect(row.origin.x + 6, y + 1, row.size.w - 12, 20),
                          GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
       continue;
     }
 
+    // Rows without a value column get the whole width. Reset stats is the one
+    // that needs it -- FR "Effacer les stats", DE "Statistik loschen" and ES
+    // "Borrar estadisticas" all overran the 96px the value column left behind,
+    // truncating the label on the destructive row.
+    bool has_val = row_has_value(i);
     graphics_context_set_text_color(ctx, COL_TEXT);
     graphics_draw_text(ctx, row_label(i), f18,
-                       GRect(row.origin.x + 6, y + 1, row.size.w - 12 - val_w, 20),
+                       GRect(row.origin.x + 6, y + 1,
+                             row.size.w - 12 - (has_val ? val_w : 0), 20),
                        GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
 
     char val[28];
     if (!row_value(i, val, sizeof(val))) continue;
 
-    // While editing the custom rhythm, box the slot being changed.
+    // While editing the custom rhythm, underline the slot being changed.
     if (i == ROW_RHYTHM && s_edit_slot >= 0) {
       GRect vr = GRect(row.origin.x + row.size.w - val_w - 6, y + 1, val_w, 20);
       graphics_context_set_text_color(ctx, COL_ACCENT);
       graphics_draw_text(ctx, val, f18, vr, GTextOverflowModeTrailingEllipsis,
                          GTextAlignmentRight, NULL);
-      // Underline marks which of the four numbers UP/DOWN is moving.
-      int16_t seg = val_w / 4;
-      GPoint p1 = GPoint(vr.origin.x + s_edit_slot * seg + 2, y + 20);
-      graphics_context_set_stroke_color(ctx, COL_ACCENT);
-      graphics_draw_line(ctx, p1, GPoint(p1.x + seg - 4, p1.y));
+
+      // The underline has to be measured, not divided. The value is drawn
+      // right-aligned and its four numbers are variable width ("5.5" against
+      // "4"), so splitting the box into equal quarters from its left edge put
+      // the marker nowhere near the number it claimed to point at -- for
+      // "4-4-4-4" slot 0 landed entirely left of the first digit.
+      int start = 0, end = (int)strlen(val), seen = 0;
+      for (int k = 0; val[k]; k++) {
+        if (val[k] != '-') continue;
+        if (seen == s_edit_slot) { end = k; break; }
+        seen++;
+        start = k + 1;
+      }
+      // Measure inside a box the size of the one the text is drawn in, with
+      // WordWrap: that is the combination that reports the text's own width.
+      const GRect mbox = GRect(0, 0, val_w, 20);
+      char part[28];
+      int16_t w_all = graphics_text_layout_get_content_size(
+          val, f18, mbox, GTextOverflowModeWordWrap, GTextAlignmentLeft).w;
+      int16_t w_pre = 0;
+      if (start > 0) {
+        memcpy(part, val, start);
+        part[start] = '\0';
+        w_pre = graphics_text_layout_get_content_size(
+            part, f18, mbox, GTextOverflowModeWordWrap, GTextAlignmentLeft).w;
+      }
+      memcpy(part, val + start, end - start);
+      part[end - start] = '\0';
+      int16_t w_seg = graphics_text_layout_get_content_size(
+          part, f18, mbox, GTextOverflowModeWordWrap, GTextAlignmentLeft).w;
+
+      // y + 19, not y + 20: the row's own outline runs along y + 20, and while
+      // editing that outline is drawn in COL_ACCENT too -- so the marker was
+      // landing on top of it and could not be told apart from the border at
+      // all. White also separates it from the accent-coloured digits above.
+      int16_t tx = vr.origin.x + vr.size.w - w_all;   // right-aligned text start
+      graphics_context_set_stroke_color(ctx, COL_TEXT);
+      graphics_draw_line(ctx, GPoint(tx + w_pre, y + 19),
+                              GPoint(tx + w_pre + w_seg - 1, y + 19));
       continue;
     }
 
@@ -152,7 +205,10 @@ static void settings_update(Layer *layer, GContext *ctx) {
 
   graphics_context_set_text_color(ctx, COL_DIM);
   graphics_draw_text(ctx, s_edit_slot >= 0 ? S(S_RHYTHM_HINT) : S(S_SETTINGS_HINT), f14,
-                     GRect(4, ROW_Y0 + NUM_ROWS * ROW_H - 1, b.size.w - 8, 18),
+                     // Full width and one row up: the old box started at y=211
+                     // with h=18, i.e. its last pixel row fell off a 228px
+                     // screen, and DE filled the width exactly.
+                     GRect(2, ROW_Y0 + NUM_ROWS * ROW_H - 3, b.size.w - 4, 18),
                      GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
 }
 

@@ -74,6 +74,10 @@ static void play(const SpeakerNote *notes, uint32_t count) {
 #else
   uint8_t level = SND_VOL[g_set.sound_vol & 3];
   if (!level) return;
+  // Quiet Time is the watch saying "not now". A breathing coach is exactly the
+  // kind of app someone opens in a quiet room, so the cues go haptic-only for
+  // the duration without touching the Sound setting.
+  if (quiet_time_is_active()) return;
   if (count > MAX_CUE_NOTES) count = MAX_CUE_NOTES;
 
   // Nothing else is touched: no speaker_get_status, no speaker_stop, no
@@ -110,8 +114,25 @@ static const uint32_t VIB_DONE[] = {90, 120, 90, 120, 220};
 // lives. Two watches' worth of evidence, one of them ending in factory mode, so
 // the tones are gone rather than re-tuned. Build with CAIRN_PHASE_TONES=1 to
 // put them back for another experiment; never ship that.
+//
+// That experimental build plays ONE short note per phase, not the five-note
+// swells above. The two candidate explanations for the freeze predict different
+// outcomes here, which is the whole point of running it:
+//
+//   - if the phrase is what the firmware cannot take (5 notes / ~450 ms queued
+//     from a timer callback), a single 70 ms note survives;
+//   - if the timer callback is what it cannot take, one note dies too.
+//
+// The pitches keep the phases apart by ear — in above hold above out — but a
+// single note cannot carry the rise-and-fall shape, so this is a diagnostic
+// build, never a shippable sound. See docs/phase-tone-test.md for the protocol.
 #ifdef CAIRN_PHASE_TONES
-#define PHASE_PLAY(a) play(a, SFX_N(a))
+static const SpeakerNote SFX_IN_1[]   = {{69, SI, 70, 85, 0}};   // A4
+static const SpeakerNote SFX_HOLD_1[] = {{72, SI, 70, 85, 0}};   // C5
+static const SpeakerNote SFX_OUT_1[]  = {{65, SI, 70, 85, 0}};   // F4
+// The (void)(a) keeps the full phrase tables referenced, so swapping the
+// experiment back to them is a one-line change and neither build warns.
+#define PHASE_PLAY(a) do { (void)(a); play(a##_1, SFX_N(a##_1)); } while (0)
 #else
 #define PHASE_PLAY(a) do { (void)(a); } while (0)
 #endif
