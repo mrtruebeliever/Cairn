@@ -2,11 +2,12 @@
 #include "i18n.h"
 #include <string.h>
 
-// Normalization ceilings, in bpm. A 12-bpm drop over a session and a 8-bpm
-// respiratory swing both count as "as good as it gets"; these are starting
-// values to be calibrated on real hardware.
+// Normalization ceilings. A 12-bpm drop over a session, an 8-bpm respiratory
+// swing and a 40 ms RMSSD both count as "as good as it gets"; these are
+// starting values to be calibrated on real hardware.
 #define HR_DROP_FULL 12
 #define RSA_FULL     8
+#define RMSSD_FULL   40
 
 static int32_t norm(int32_t v, int32_t full) {
   if (v <= 0) return 0;
@@ -23,14 +24,25 @@ uint8_t insights_score(const SessionResult *r) {
   }
   int32_t drop = norm(r->hr_drop, HR_DROP_FULL);
   int32_t rsa  = norm(r->rsa, RSA_FULL);
-  int32_t s = ((int32_t)r->completion * 35 + drop * 35 + rsa * 30) / 100;
+  int32_t s;
+  if (r->has_hrv) {
+    // RMSSD is the more direct signal, so it takes the biggest share once the
+    // sensor delivered it; RSA keeps a smaller weight rather than dropping out,
+    // since the two agreeing is itself informative.
+    int32_t rmssd = norm(r->rmssd_ms, RMSSD_FULL);
+    s = ((int32_t)r->completion * 25 + drop * 25 + rsa * 20 + rmssd * 30) / 100;
+  } else {
+    s = ((int32_t)r->completion * 35 + drop * 35 + rsa * 30) / 100;
+  }
   if (s < 0) s = 0;
   if (s > 100) s = 100;
   return (uint8_t)s;
 }
 
 // Rule table from the plan: {condition, string id}, evaluated top to bottom so
-// the first match is the highest-priority advice.
+// the first match is the highest-priority advice. The RMSSD rules sit ahead of
+// the RSA ones: RMSSD is the more direct signal, so it wins when both are
+// available.
 int insights_session_tip(const SessionResult *r) {
   if (r->new_best)                              return S_TIP_BEST;
   if (!r->has_hr)                               return S_TIP_NOHR;
@@ -38,6 +50,8 @@ int insights_session_tip(const SessionResult *r) {
   if (r->hr_start > 90)                         return S_TIP_HR_HIGH;
   if (r->hr_drop >= 6)                          return S_TIP_BIGDROP;
   if (r->hr_drop <= 1 && r->completion >= 90)   return S_TIP_FLAT;
+  if (r->has_hrv && r->rmssd_ms >= 35)          return S_TIP_HRV_GOOD;
+  if (r->has_hrv && r->rmssd_ms <= 15 && r->completion >= 90) return S_TIP_HRV_LOW;
   if (r->rsa >= 5)                              return S_TIP_RSA_GOOD;
   if (r->rsa <= 2)                              return S_TIP_RSA_LOW;
   if (r->completion < 60)                       return S_TIP_SHORT;

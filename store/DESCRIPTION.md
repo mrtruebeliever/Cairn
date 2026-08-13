@@ -15,15 +15,12 @@ tick to hold, a longer pull to breathe out — so you can follow the rhythm with
 your eyes closed.
 
 While you breathe, the watch reads your heart rate every second. Afterwards you
-get a calm score out of 100 built from three things: how much of the session you
-finished, how far your heart rate came down, and how strongly it rose and fell
-with your breathing. That last one is real physiology — respiratory sinus
-arrhythmia — and it is what separates a session you were present for from one
-you merely sat through.
-
-It is called a calm score, not HRV, on purpose: the watch gives apps a heart
-rate in beats per minute and never the beat-to-beat intervals a true HRV
-measurement needs. Cairn measures what it can actually see, and says so.
+get a calm score out of 100 built from completion, how far your heart rate came
+down, how strongly it rose and fell with your breathing — real physiology,
+respiratory sinus arrhythmia — and, on watches that deliver it, your actual
+heart rate variability (RMSSD, the beat-to-beat detail behind true HRV). It is
+the difference between a session you were present for and one you merely sat
+through.
 
 Finish a session and a stone is added to your cairn. Keep it up day after day
 and the stack grows, badges unlock, and the progress screen shows where your
@@ -36,8 +33,9 @@ FEATURES
 • Sessions of 1, 2, 3, 5, 10 or 15 minutes.
 • Live heart rate, sampled every second, with a priming screen so the starting
   reading is a real baseline.
-• A calm score from completion, heart-rate drop and breath-linked heart-rate
-  swing — and an honest fallback when there is no reading.
+• A calm score from completion, heart-rate drop, breath-linked heart-rate
+  swing and — where the watch supports it — real heart rate variability
+  (RMSSD), with an honest fallback when there is no reading at all.
 • A growing cairn, six badges, a personal best and your last 20 sessions.
 • 7- and 30-day trends for calm score and resting heart rate, plus a coaching
   line.

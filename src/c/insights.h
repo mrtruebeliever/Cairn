@@ -10,6 +10,8 @@ typedef struct {
   uint8_t  hr_end;
   int16_t  hr_drop;      // avg(first fifth) - avg(last fifth), bpm; may be < 0
   int16_t  rsa;          // avg peak-to-trough HR swing per breath cycle, bpm
+  bool     has_hrv;      // true once the session collected enough valid PPI samples
+  uint16_t rmssd_ms;     // RMSSD of successive heartbeat PPI differences, ms
   uint8_t  completion;   // 0..100 % of the planned duration actually breathed
   uint8_t  score;        // 0..100 calm score
   uint16_t dur_s;
@@ -17,9 +19,9 @@ typedef struct {
   bool     new_best;
 } SessionResult;
 
-// Calm score from the measured session. Honest about its limits: the SDK only
-// exposes BPM (no beat-to-beat RR intervals), so this is a calm/coherence
-// score, not clinical HRV.
+// Calm score from the measured session: completion, HR drop and RSA (bpm swing
+// per breath), plus RMSSD when the sensor delivered peak-to-peak intervals
+// (SDK 4.33+; falls back to the RSA-only blend when it didn't).
 uint8_t insights_score(const SessionResult *r);
 
 // The single per-session coaching line. Rule table, highest matching priority

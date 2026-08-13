@@ -64,6 +64,14 @@ static uint8_t  s_cyc_min, s_cyc_max;
 static uint32_t s_swing_sum;
 static uint16_t s_swing_n;
 
+// HRV (SDK 4.33+). RMSSD — root mean square of successive PPI differences —
+// accumulated as a running sum of squares so memory stays flat regardless of
+// session length, same approach as the HR segment sums above.
+#define HRV_MIN_SAMPLES 3   // fewer than this and the number is too noisy to show
+static uint16_t s_last_ppi_ms;
+static uint32_t s_rmssd_sq_sum;
+static uint16_t s_rmssd_n;
+
 static void tick(void *data);
 static void begin_breathing(void);
 
@@ -129,6 +137,30 @@ static void sample_hr(void) {
   if (bpm > s_cyc_max) s_cyc_max = (uint8_t)bpm;
 }
 
+// One HRV reading. Fires on HealthEventHRVUpdate, independently of the once-
+// per-second sample_hr() polling above.
+static void sample_hrv(void) {
+  uint16_t ppi = health_service_peek_hrv_ppi_ms();
+  if (ppi < 300 || ppi > 2000) return;   // sensor noise / no contact
+
+  if (s_last_ppi_ms) {
+    int32_t diff = (int32_t)ppi - (int32_t)s_last_ppi_ms;
+    if (diff > -200 && diff < 200) {   // reject a missed-beat artifact
+      s_rmssd_sq_sum += (uint32_t)(diff * diff);
+      s_rmssd_n++;
+    }
+  }
+  s_last_ppi_ms = ppi;
+}
+
+// Newton's method integer square root. Avoids linking libm for a single call.
+static uint16_t isqrt_u32(uint32_t v) {
+  if (v == 0) return 0;
+  uint32_t x = v, y = (x + 1) / 2;
+  while (y < x) { x = y; y = (x + v / x) / 2; }
+  return (uint16_t)x;
+}
+
 // Leaves the priming screen and starts the first inhale. The reading taken while
 // priming stays as the session's opening heart rate, but the per-fifth sums are
 // cleared so the start-vs-end delta only covers actual breathing.
@@ -142,6 +174,9 @@ static void begin_breathing(void) {
   s_cyc_max = 0;
   s_swing_sum = 0;
   s_swing_n = 0;
+  s_last_ppi_ms = 0;
+  s_rmssd_sq_sum = 0;
+  s_rmssd_n = 0;
   cue_for_phase(PH_IN);
 }
 
@@ -179,6 +214,10 @@ static void finish_session(void) {
     if (last < 0)  last = s_hr_last;
     res.hr_drop = first - last;
     res.rsa = s_swing_n ? (int16_t)(s_swing_sum / s_swing_n) : 0;
+  }
+  if (s_rmssd_n >= HRV_MIN_SAMPLES) {
+    res.has_hrv  = true;
+    res.rmssd_ms = isqrt_u32(s_rmssd_sq_sum / s_rmssd_n);
   }
   res.score = insights_score(&res);
 
@@ -515,6 +554,8 @@ static void sess_unload(Window *window) {
 static void health_handler(HealthEventType event, void *context) {
   if (event == HealthEventHeartRateUpdate || event == HealthEventSignificantUpdate) {
     sample_hr();
+  } else if (event == HealthEventHRVUpdate) {
+    sample_hrv();
   }
 }
 
@@ -522,6 +563,7 @@ static void health_handler(HealthEventType event, void *context) {
 
 void hr_sampling_apply(void) {
   health_service_set_heart_rate_sample_period(g_set.show_hr ? HR_SAMPLE_INTERVAL_S : 0);
+  health_service_set_hrv_sample_period(g_set.show_hr ? HR_SAMPLE_INTERVAL_S : 0);
 }
 
 void session_window_push(void) {
@@ -548,6 +590,9 @@ void session_window_push(void) {
   s_cyc_max = 0;
   s_swing_sum = 0;
   s_swing_n = 0;
+  s_last_ppi_ms = 0;
+  s_rmssd_sq_sum = 0;
+  s_rmssd_n = 0;
   memset(s_seg_sum, 0, sizeof(s_seg_sum));
   memset(s_seg_n, 0, sizeof(s_seg_n));
 

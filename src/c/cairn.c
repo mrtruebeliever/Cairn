@@ -28,6 +28,7 @@
 // cancelled, so deinit hands the schedule back.
 
 static void init(void) {
+  app_touch_navigation_enable(true);   // opt in to system touch nav on the history menu
   i18n_init();
   settings_load();
   stats_load();

@@ -70,6 +70,7 @@ enum {
   // Per-session coaching tips (rule table, highest matching priority wins)
   S_TIP_BEST, S_TIP_NOHR, S_TIP_HR_UP, S_TIP_HR_HIGH, S_TIP_BIGDROP,
   S_TIP_FLAT, S_TIP_RSA_GOOD, S_TIP_RSA_LOW, S_TIP_SHORT, S_TIP_LONG_DONE,
+  S_TIP_HRV_GOOD, S_TIP_HRV_LOW,
 
   // Trend coaching tips (7/30-day patterns)
   S_TT_SCORE_UP, S_TT_SCORE_DOWN, S_TT_PLATEAU, S_TT_HR_DOWN, S_TT_HR_UP,

@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.1.0
+
+- **Real heart rate variability.** With SDK 4.33's HRV support, the calm
+  score and the per-session coaching line now factor in RMSSD (the
+  variability between successive heartbeats) when the watch's sensor
+  delivers it, on top of completion, heart-rate drop and breath-linked
+  swing. Without an HRV reading, the score falls back to exactly what it
+  did before.
+- **Touch on the history menu** now uses the watch's own touch navigation
+  (SDK 4.33) instead of doing nothing — tap and scroll work like every
+  other menu on the watch.
+
 ## 1.0.0
 
 - Initial release: **Cairn**, a guided breathing coach with live heart rate for

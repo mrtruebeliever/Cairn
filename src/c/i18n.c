@@ -53,6 +53,8 @@ static const char *TR[NUM_LANGS][NUM_STRS] = {
     "Slow down a little - around 5-6 breaths per minute your heart rate waves the most.",
     "Short but good. One minute longer next time for more effect.",
     "Full session finished - strong. Consistency beats length.",
+    "Great heart-rate variability - your body relaxed deeply this session.",
+    "Low variability, even though you finished. Slower, longer exhales usually help.",
 
     "Your calm score is rising. Your nervous system is learning this - keep going.",
     "Your scores are slipping. Pick a fixed moment (before bed, say) for more regularity.",
@@ -115,6 +117,8 @@ static const char *TR[NUM_LANGS][NUM_STRS] = {
     "Vertraag iets - rond 5-6 ademhalingen per minuut golft je hartslag het sterkst mee.",
     "Kort maar goed. Volgende keer één minuut langer voor meer effect.",
     "Volledige sessie afgerond - sterk. Consistentie telt meer dan lengte.",
+    "Sterke hartslagvariabiliteit - je lichaam ontspande diep deze sessie.",
+    "Lage variabiliteit, ook al maakte je de sessie af. Langere, langzame uitademingen helpen vaak.",
 
     "Je kalmte-score stijgt. Je zenuwstelsel leert dit - ga zo door.",
     "Je scores zakken wat. Kies een vast moment (bv. voor het slapen) voor meer regelmaat.",
@@ -177,6 +181,8 @@ static const char *TR[NUM_LANGS][NUM_STRS] = {
     "Ralentis un peu - vers 5-6 respirations par minute, le pouls ondule le plus.",
     "Court mais bien. Une minute de plus la prochaine fois.",
     "Séance complète terminée - bravo. La régularité compte plus que la durée.",
+    "Belle variabilité du rythme cardiaque - ton corps s'est profondément détendu.",
+    "Variabilité faible, même si tu as terminé. Des expirations plus longues et lentes aident souvent.",
 
     "Ton score de calme monte. Ton système nerveux apprend - continue.",
     "Tes scores baissent un peu. Choisis un moment fixe (avant le coucher) pour plus de régularité.",
@@ -239,6 +245,8 @@ static const char *TR[NUM_LANGS][NUM_STRS] = {
     "Etwas langsamer - bei 5-6 Atemzügen pro Minute schwingt der Puls am stärksten.",
     "Kurz, aber gut. Nächstes Mal eine Minute länger.",
     "Volle Sitzung geschafft - stark. Regelmäßigkeit zählt mehr als Länge.",
+    "Starke Herzratenvariabilität - dein Körper hat sich diesmal tief entspannt.",
+    "Geringe Variabilität, obwohl du fertig geworden bist. Längeres, langsameres Ausatmen hilft oft.",
 
     "Dein Ruhe-Wert steigt. Dein Nervensystem lernt das - weiter so.",
     "Deine Werte sinken etwas. Wähle eine feste Zeit (z. B. vor dem Schlafen).",
@@ -301,6 +309,8 @@ static const char *TR[NUM_LANGS][NUM_STRS] = {
     "Ve algo más lento - sobre 5-6 respiraciones por minuto el pulso ondula más.",
     "Corto pero bueno. La próxima vez un minuto más.",
     "Sesión completa terminada - bien. La constancia cuenta más que la duración.",
+    "Buena variabilidad del ritmo cardíaco - tu cuerpo se relajó profundamente esta sesión.",
+    "Variabilidad baja, aunque terminaste. Espiraciones más largas y lentas suelen ayudar.",
 
     "Tu puntuación de calma sube. Tu sistema nervioso lo está aprendiendo - sigue así.",
     "Tus puntuaciones bajan algo. Elige un momento fijo (antes de dormir) para más constancia.",
