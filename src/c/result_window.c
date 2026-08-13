@@ -1,4 +1,5 @@
 #include "result_window.h"
+#include "touch_nav.h"
 #include "art.h"
 #include "backlight.h"
 #include "home_window.h"
@@ -199,6 +200,20 @@ static void res_select(ClickRecognizerRef rec, void *ctx) {
   window_stack_pop(true);
 }
 
+// --- Touch: tap advances the badge pages / dismisses, swipe right goes back ---
+
+bool result_window_is_top(void) {
+  return s_win && window_stack_get_top_window() == s_win;
+}
+
+void result_window_handle_touch(const TouchEvent *event) {
+  switch (touch_nav_feed(NULL, event, NULL)) {
+    case TOUCH_NAV_TAP:  res_select(NULL, NULL); break;
+    case TOUCH_NAV_BACK: window_stack_pop(true); break;
+    default: break;
+  }
+}
+
 static void res_clicks(void *context) {
   window_single_click_subscribe(BUTTON_ID_SELECT, res_select);
 }
@@ -243,6 +258,7 @@ void result_window_push(const SessionResult *res, uint32_t fresh_badges) {
   s_win = window_create();
   window_set_background_color(s_win, COL_BG);
   window_set_click_config_provider(s_win, res_clicks);
+  window_set_touch_bridge_disabled(s_win, true);
   window_set_window_handlers(s_win, (WindowHandlers){
     .load = res_load, .unload = res_unload, .appear = res_appear,
   });

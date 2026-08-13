@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.2.0
+
+- **Touch navigation, done in the app.** On the home screen a tap starts a
+  session and a vertical flick changes the breathing pattern; the history list
+  scrolls with your finger and keeps gliding when you let go; the settings list
+  is tappable row by row; and a left-to-right swipe goes back from history,
+  settings, insights and the result screen — and from the home screen it leaves
+  the app, as BACK does. The session screen deliberately
+  ignores touch, so a stray hand mid-exercise cannot interrupt the breathing.
+- **The 1.1.0 opt-in into the watch's touch navigation is gone.** On firmware
+  4.33.1 `app_touch_navigation_enable(true)` faults inside firmware on the first
+  touch and kills the app, whatever the app does. Touch now comes straight from
+  the raw touch stream (`src/c/touch_nav.c`), which bypasses that bridge.
+  Reported as [PebbleOS#1865](https://github.com/coredevices/PebbleOS/issues/1865).
+
 ## 1.1.0
 
 - **Real heart rate variability.** With SDK 4.33's HRV support, the calm

@@ -4,6 +4,7 @@
 #include "history_window.h"
 #include "i18n.h"
 #include "insights_window.h"
+#include "touch_nav.h"
 #include "session.h"
 #include "settings.h"
 #include "sfx.h"
@@ -174,6 +175,28 @@ static void down_long(ClickRecognizerRef rec, void *ctx) {
   settings_window_push();
 }
 
+// --- Touch -------------------------------------------------------------------
+//
+// The system touch bridge faults inside firmware on 4.33.1, so touch is handled
+// from the raw stream here (see touch_nav.h). Nothing on this screen scrolls, so
+// the gestures mirror the buttons: tap starts a session like SELECT, and a
+// vertical flick steps through the presets like UP/DOWN. A right swipe means
+// back, which on this root window leaves the app — exactly what BACK does.
+
+bool home_window_is_top(void) {
+  return s_window && window_stack_get_top_window() == s_window;
+}
+
+void home_window_handle_touch(const TouchEvent *event) {
+  switch (touch_nav_feed(NULL, event, NULL)) {
+    case TOUCH_NAV_TAP:        select_click(NULL, NULL); break;
+    case TOUCH_NAV_SWIPE_UP:   down_click(NULL, NULL); break;
+    case TOUCH_NAV_SWIPE_DOWN: up_click(NULL, NULL); break;
+    case TOUCH_NAV_BACK:       window_stack_pop(true); break;   // leaves the app, as BACK does
+    default: break;
+  }
+}
+
 static void click_config(void *context) {
   window_single_click_subscribe(BUTTON_ID_SELECT, select_click);
   window_single_click_subscribe(BUTTON_ID_UP, up_click);
@@ -220,6 +243,7 @@ void home_window_push(void) {
     s_window = window_create();
     window_set_background_color(s_window, COL_BG);
     window_set_click_config_provider(s_window, click_config);
+    window_set_touch_bridge_disabled(s_window, true);
     window_set_window_handlers(s_window, (WindowHandlers){
       .load = window_load,
       .unload = window_unload,

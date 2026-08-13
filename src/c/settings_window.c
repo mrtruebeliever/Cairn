@@ -1,4 +1,5 @@
 #include "settings.h"
+#include "touch_nav.h"
 #include "i18n.h"
 // ---------------------------------------------------------------------------
 // On-watch settings screen. Custom-drawn rather than a MenuLayer so it matches
@@ -293,6 +294,38 @@ static void set_back(ClickRecognizerRef rec, void *ctx) {
   window_stack_pop(true);
 }
 
+// --- Touch -------------------------------------------------------------------
+//
+// The system touch bridge faults inside firmware on 4.33.1, so touch is handled
+// from the raw stream here (see touch_nav.h). This list is custom-drawn rather
+// than a MenuLayer, so the rows are hit-tested against the same ROW_Y0/ROW_H
+// geometry settings_update() draws with. Gestures mirror the buttons, including
+// inside the custom-rhythm editor, where UP/DOWN change the value.
+
+bool settings_window_is_top(void) {
+  return s_win && window_stack_get_top_window() == s_win;
+}
+
+void settings_window_handle_touch(const TouchEvent *event) {
+  GPoint point;
+  switch (touch_nav_feed(NULL, event, &point)) {
+    case TOUCH_NAV_TAP: {
+      if (s_edit_slot < 0) {
+        int row = (point.y - ROW_Y0) / ROW_H;
+        if (point.y < ROW_Y0 || row < 0 || row >= NUM_ROWS) { return; }
+        s_reset_armed = false;   // tapping elsewhere disarms, as moving away does
+        s_sel = (int8_t)row;
+      }
+      set_sel_click(NULL, NULL);
+      break;
+    }
+    case TOUCH_NAV_SWIPE_UP:   set_down(NULL, NULL); break;
+    case TOUCH_NAV_SWIPE_DOWN: set_up(NULL, NULL); break;
+    case TOUCH_NAV_BACK:       set_back(NULL, NULL); break;
+    default: break;
+  }
+}
+
 static void set_clicks(void *context) {
   window_single_click_subscribe(BUTTON_ID_SELECT, set_sel_click);
   window_single_click_subscribe(BUTTON_ID_UP, set_up);
@@ -322,6 +355,7 @@ void settings_window_push(void) {
   s_win = window_create();
   window_set_background_color(s_win, COL_BG);
   window_set_click_config_provider(s_win, set_clicks);
+  window_set_touch_bridge_disabled(s_win, true);
   window_set_window_handlers(s_win, (WindowHandlers){
     .load = set_load, .unload = set_unload,
   });

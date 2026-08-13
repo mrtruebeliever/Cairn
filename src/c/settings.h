@@ -37,3 +37,7 @@ uint16_t settings_cycle_tenths(void);
 
 // The on-watch settings screen (custom-drawn, no MenuLayer).
 void settings_window_push(void);
+
+// Raw touch, forwarded from the app-wide subscription while this window is on top.
+bool settings_window_is_top(void);
+void settings_window_handle_touch(const TouchEvent *event);

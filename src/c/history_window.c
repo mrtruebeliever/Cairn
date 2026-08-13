@@ -1,4 +1,5 @@
 #include "history_window.h"
+#include "touch_nav.h"
 #include "art.h"
 #include "backlight.h"
 #include "i18n.h"
@@ -79,7 +80,38 @@ static void hist_load(Window *window) {
   layer_add_child(root, menu_layer_get_layer(s_menu));
 }
 
+// --- Touch -------------------------------------------------------------------
+//
+// The system touch bridge faults inside firmware on 4.33.1, so touch is handled
+// from the raw stream here — see touch_nav.h. Rows are read-only, so a tap does
+// nothing and only scrolling and the back swipe are wired up.
+
+// Keeps the highlight on a visible row after a drag or glide, so the next
+// UP/DOWN does not yank the list back to where the finger started.
+static void touch_settled(void) {
+  if (!s_menu) { return; }
+  GRect frame = layer_get_frame(menu_layer_get_layer(s_menu));
+  int row = touch_nav_row_at(s_menu, GPoint(frame.size.w / 2, frame.origin.y + frame.size.h / 2),
+                             num_rows(s_menu, 0, NULL), cell_height);
+  if (row >= 0) {
+    menu_layer_set_selected_index(s_menu, MenuIndex(0, (uint16_t)row), MenuRowAlignNone, false);
+    layer_mark_dirty(menu_layer_get_layer(s_menu));   // no scroll means no repaint otherwise
+  }
+}
+
+bool history_window_is_top(void) {
+  return s_win && window_stack_get_top_window() == s_win;
+}
+
+void history_window_handle_touch(const TouchEvent *event) {
+  ScrollLayer *scroll = s_menu ? menu_layer_get_scroll_layer(s_menu) : NULL;
+  if (touch_nav_feed(scroll, event, NULL) == TOUCH_NAV_BACK) {
+    window_stack_pop(true);
+  }
+}
+
 static void hist_unload(Window *window) {
+  touch_nav_reset();
   if (s_menu) { menu_layer_destroy(s_menu); s_menu = NULL; }
   if (s_empty) { text_layer_destroy(s_empty); s_empty = NULL; }
   window_destroy(s_win);
@@ -92,6 +124,8 @@ void history_window_push(void) {
   window_set_window_handlers(s_win, (WindowHandlers){
     .load = hist_load, .unload = hist_unload,
   });
+  window_set_touch_bridge_disabled(s_win, true);
+  touch_nav_set_settled_handler(touch_settled);
   window_stack_push(s_win, true);
   backlight_apply();
 }

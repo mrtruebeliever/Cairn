@@ -12,7 +12,11 @@
 #include <pebble.h>
 #include "backlight.h"
 #include "comms.h"
+#include "history_window.h"
 #include "home_window.h"
+#include "insights_window.h"
+#include "result_window.h"
+#include "touch_nav.h"
 #include "i18n.h"
 #include "session.h"
 #include "settings.h"
@@ -27,8 +31,22 @@
 // RSA term of the score) measurable at all. The request outlives the app unless
 // cancelled, so deinit hands the schedule back.
 
+// One app-wide subscription powers the touch sensor; events go to the window on
+// top. The system navigation bridge is not usable — see the note in init(). The
+// session screen is deliberately absent: a stray touch mid-exercise should not
+// interrupt the breathing.
+static void touch_dispatch(const TouchEvent *event, void *context) {
+  if (settings_window_is_top())      { settings_window_handle_touch(event); }
+  else if (history_window_is_top())  { history_window_handle_touch(event); }
+  else if (insights_window_is_top()) { insights_window_handle_touch(event); }
+  else if (result_window_is_top())   { result_window_handle_touch(event); }
+  else if (home_window_is_top())     { home_window_handle_touch(event); }
+}
+
 static void init(void) {
-  app_touch_navigation_enable(true);   // opt in to system touch nav on the history menu
+  // No app_touch_navigation_enable() here: on firmware 4.33.1 the system touch
+  // bridge faults inside firmware on the first touch and kills the app. Buttons
+  // only until a later firmware fixes it.
   i18n_init();
   settings_load();
   stats_load();
@@ -36,6 +54,7 @@ static void init(void) {
   hr_sampling_apply();
   backlight_apply();
   home_window_push();
+  touch_service_subscribe(touch_dispatch, NULL);
   cue_app_open();
 }
 

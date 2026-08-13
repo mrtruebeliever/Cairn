@@ -1,4 +1,5 @@
 #include "insights_window.h"
+#include "touch_nav.h"
 #include "art.h"
 #include "backlight.h"
 #include "comms.h"
@@ -122,6 +123,18 @@ static void ins_unload(Window *window) {
   s_win = NULL;
 }
 
+// --- Touch: nothing to scroll or activate here, so only the back swipe ---
+
+bool insights_window_is_top(void) {
+  return s_win && window_stack_get_top_window() == s_win;
+}
+
+void insights_window_handle_touch(const TouchEvent *event) {
+  if (touch_nav_feed(NULL, event, NULL) == TOUCH_NAV_BACK) {
+    window_stack_pop(true);
+  }
+}
+
 void insights_window_push(void) {
   // Show the watch's own numbers immediately; the phone's fuller answer
   // replaces them via insights_window_set_trend() when it arrives.
@@ -129,6 +142,7 @@ void insights_window_push(void) {
 
   s_win = window_create();
   window_set_background_color(s_win, COL_BG);
+  window_set_touch_bridge_disabled(s_win, true);
   window_set_window_handlers(s_win, (WindowHandlers){
     .load = ins_load, .unload = ins_unload,
   });

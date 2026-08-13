@@ -20,6 +20,13 @@ stone on your own cairn, and the watch scores how much calmer you got.
 
 During a session: **SELECT** pauses, **BACK** asks to stop.
 
+On the touchscreen: **tap** the home screen to start a session, **flick up or
+down** to change the pattern, and **swipe left-to-right** to go back from
+history, settings, insights or the result screen — on the home screen that
+leaves the app, just like BACK. The history and settings lists
+scroll with your finger and are tappable row by row. A session ignores touch on
+purpose — a stray hand should not interrupt your breathing.
+
 ## What it does
 
 - **Four breathing patterns** — Coherent (5.5 s in, 5.5 s out, about 5.5 breaths
