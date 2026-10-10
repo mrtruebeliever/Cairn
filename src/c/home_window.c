@@ -123,6 +123,11 @@ static void draw_button_bar(GContext *ctx, GRect b, int16_t layer_top, int16_t s
   for (int i = 0; i < 3; i++) {
     int16_t ys = centers[i] - layer_top - gap / 2 - 2;
     int16_t yl = centers[i] - layer_top + gap;
+#if defined(PBL_ROUND)
+    // On the round screen the tide runs right under SELECT, out to the bezel,
+    // and would swallow a grey icon; the long press goes above it instead.
+    if (i == 1) yl = ys - gap - 2;
+#endif
     graphics_context_set_fill_color(ctx, COL_TEXT);
     shorts[i](ctx, GPoint(bar_x(b, ys, layer_top), ys));
     graphics_context_set_fill_color(ctx, COL_DIM);
