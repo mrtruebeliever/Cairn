@@ -11,6 +11,7 @@ typedef struct {
   bool     haptics_on;
   int8_t   bl_mode;       // BacklightMode
   bool     show_hr;
+  int16_t  reminder;      // minutes after midnight, REMINDER_OFF = none
 } Settings;
 
 extern Settings g_set;
@@ -26,6 +27,10 @@ void settings_set_sound(int8_t vol);
 void settings_set_haptics(bool on);
 void settings_set_backlight(int8_t mode);
 void settings_set_show_hr(bool on);
+// Also (re)schedules the reminder's wakeup.
+void settings_set_reminder(int16_t minutes);
+// Steps to the next offered reminder time (Off first).
+void settings_next_reminder(void);
 
 // The pattern the current preset resolves to (custom included).
 BreathPattern settings_pattern(void);

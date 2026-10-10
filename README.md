@@ -1,6 +1,7 @@
 # Cairn
 
-A guided breathing coach with live heart rate for the Pebble Time 2 (emery).
+A guided breathing coach with live heart rate for the Pebble Time 2 (emery), also
+built for the Pebble Round 2 (gabbro) and Pebble 2 Duo (flint).
 
 Breathe with the tide: **inhale and the water rises, exhale and it falls**,
 uncovering a cairn of stones on the shore. Every finished session lays another
@@ -17,6 +18,9 @@ stone on your own cairn, and the watch scores how much calmer you got.
 | SELECT (hold) | progress & trends            |
 | UP (hold)     | history                      |
 | DOWN (hold)   | settings                     |
+
+A bar along the buttons shows both: the short press on top, the long press
+beneath it in grey.
 
 During a session: **SELECT** pauses, **BACK** asks to stop.
 
@@ -38,9 +42,13 @@ purpose — a stray hand should not interrupt your breathing.
   haptic pulses on every phase change — a nudge to breathe in, a double tick to
   hold, a longer pull to breathe out — so the rhythm can be followed with your
   eyes closed. Sound, at four volume levels, marks the app opening and the end
-  of a session; the breathing phases themselves are deliberately silent (see
-  `src/c/sfx.c`: playing them from the phase machine's timer callback restarted
-  PebbleOS on real hardware).
+  of a session with a singing bowl, and every phase change: a warm tone
+  rising with the inhale, one small bell for a hold, the tone drawing back on
+  the exhale. All of these are generated samples (`tools/gen_sfx.py`), not
+  beeps, so they fade in and out instead of clicking.
+- **A daily reminder**, at a time you pick (Off by default): the watch
+  vibrates and strikes a singing bowl, and stays silent if you already
+  breathed that day or Quiet Time is on.
 - **Live heart rate.** Cairn asks the sensor for a reading every second and
   waits on a short priming screen at the start, so the opening heart rate is a
   real baseline rather than a stale number.

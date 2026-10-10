@@ -1,5 +1,57 @@
 # Changelog
 
+## 1.3.0
+
+- **A button bar instead of the hint line.** The home screen's cycling hint
+  line is gone; a bar along the buttons shows what each one does, the short
+  press on top (up, start, down) and the long press beneath it in grey
+  (history, progress, settings). On the round screen the icons ride the bezel.
+- **Settings follow the watch's text size.** The rows are Gothic 24 at the
+  watch's default size on the 228px screens (18 on the 144px one) and step one size
+  down or up with Settings → Display → Text size; the value column is measured
+  instead of fixed, and arrows show when the list scrolls.
+- **A singing bowl.** Opening the app, finishing a session, earning a badge
+  and the reminder are now a struck singing bowl (a generated sample, see
+  `tools/gen_sfx.py`) instead of bright sine chimes: lower and longer at the
+  end of a session, higher with a small sparkle for a badge. The Pebble 2 Duo,
+  short on memory, keeps the chimes.
+- **Daily reminder.** Settings → Reminder (or the phone settings) picks a time,
+  Off by default. The watch then opens Cairn, vibrates and strikes the bowl —
+  unless a session was already done that day or Quiet Time is on, in which
+  case it stays silent. The settings list scrolls to make room; Reset stats is
+  now the last row, below the fold.
+- **The breathing phases have sound again.** Each phase change plays a short
+  sample with its own fade: a warm tone gliding up over a faint breath of air
+  to breathe in, a soft bell to hold, the tone drawing back down to breathe
+  out. They follow the Sound setting, Quiet Time and the
+  watch's mute like every other cue. The tones were taken out after they
+  restarted PebbleOS; a test on firmware 4.40 (`docs/phase-tone-test.md`) ran
+  clean, and the `CAIRN_PHASE_TONES` build flag is gone. The samples come from
+  `tools/gen_sfx.py` and are loaded when the session opens (on the Pebble 2
+  Duo, short on memory, they share one buffer). The session screen draws in
+  about a quarter of the time it used to (the scene cairn is drawn once and
+  copied, the foam crest is filled instead of stroked), and pauses for the
+  half-second a sound plays; a busy CPU made the sounds stutter and kept the
+  speaker from taking the next one.
+- **Follows the watch's speaker mute.** With the speaker muted in the watch
+  settings, the cues stay silent (as in Quiet Time) and the Sound row in
+  Settings reads "Muted" instead of a level that makes no sound.
+- **The backlight breathes along (Pebble Time 2).** During a session the
+  colour backlight follows the tide, warm sand when breathed out to sea blue
+  when breathed in; pausing, stopping or finishing hands it back to the
+  watch's own colour.
+- **Streak in the launcher.** Cairn's line in the app list shows the running
+  streak ("Streak: 5 d") and disappears at the moment the streak would break.
+- **Pebble Round 2 (`gabbro`) and Pebble 2 Duo (`flint`).** On the round screen
+  every screen keeps its 228px layout, centred in the circle; the tables and
+  lists (progress, settings, result) sit in a 200px frame with their titles
+  centred, the session's progress runs as a ring around the bezel, and the
+  pause and stop panels pull in from the curved sides. The 144x168 screen gets
+  its own row positions and smaller fonts on every screen, and on
+  black-and-white everything that is read turns white while panels become black
+  behind a white outline (dark grey would dither under the text).
+- Settings page moved from `pebble-clay` to `@rebble/clay` 1.1.
+
 ## 1.2.0
 
 - **Touch navigation, done in the app.** On the home screen a tap starts a

@@ -1,5 +1,27 @@
 #include "art.h"
 
+#define LAYOUT_H 228
+
+GRect screen_frame(Layer *root, bool to_bottom) {
+  GRect b = layer_get_bounds(root);
+#if defined(PBL_ROUND)
+  int16_t top = (b.size.h - LAYOUT_H) / 2;
+  b.origin.y = top;
+  b.size.h = to_bottom ? b.size.h - top : LAYOUT_H;
+#else
+  (void)to_bottom;
+#endif
+  return b;
+}
+
+GRect panel_frame(Layer *root) {
+  GRect b = layer_get_bounds(root);
+#if defined(PBL_ROUND)
+  b = GRect((b.size.w - 200) / 2, (b.size.h - LAYOUT_H) / 2, 200, LAYOUT_H);
+#endif
+  return b;
+}
+
 void draw_center(GContext *ctx, const char *text, GFont font,
                  int16_t y, int16_t h, GRect b, GColor color) {
   graphics_context_set_text_color(ctx, color);
@@ -69,6 +91,9 @@ void draw_cairn_underwater(GContext *ctx, GPoint base, int stones, int max_w,
   if (stones <= 0) return;
   if (stones > STONE_MAX) stones = STONE_MAX;
 
+  // Not antialiased: redrawn every frame as the water moves, and the soft
+  // tint hides the harder corners.
+  graphics_context_set_antialiased(ctx, false);
   for (int i = 0; i < stones; i++) {
     GRect r = stone_rect(base, i, max_w);
     int16_t bottom = r.origin.y + r.size.h;
@@ -85,6 +110,7 @@ void draw_cairn_underwater(GContext *ctx, GPoint base, int stones, int max_w,
                          5, GCornersBottom);
     }
   }
+  graphics_context_set_antialiased(ctx, true);
 }
 
 void draw_trend_arrow(GContext *ctx, GPoint c, int dir, GColor color) {
@@ -236,16 +262,20 @@ void draw_tide(GContext *ctx, GRect b, int16_t surface_y, int32_t wave_phase,
     graphics_fill_rect(ctx, GRect(x, wy, WAVE_STEP, flat - wy), 0, GCornerNone);
   }
 
-  // Foam crest, drawn as connected segments so it reads as one line.
-  graphics_context_set_stroke_color(ctx, COL_FOAM);
-  graphics_context_set_stroke_width(ctx, 2);
+  // Foam crest: per column a 2 px band that also spans the step to the previous
+  // column, so it reads as one unbroken line. Filled rectangles, not lines: a
+  // hundred 2 px-wide line segments every frame was the most expensive thing on
+  // the session screen (~13 ms of a 40 ms frame on a Time 2, antialiased or
+  // not), and a busy CPU makes the phase sounds stutter.
+  graphics_context_set_fill_color(ctx, COL_FOAM);
   int16_t prev = wave_y(surface_y, wave_phase, 0);
   for (int16_t x = WAVE_STEP; x <= b.size.w; x += WAVE_STEP) {
     int16_t wy = wave_y(surface_y, wave_phase, x);
-    graphics_draw_line(ctx, GPoint(x - WAVE_STEP, prev), GPoint(x, wy));
+    int16_t lo = wy < prev ? wy : prev;
+    int16_t hi = wy < prev ? prev : wy;
+    graphics_fill_rect(ctx, GRect(x - WAVE_STEP, lo - 1, WAVE_STEP, hi - lo + 2), 0, GCornerNone);
     prev = wy;
   }
-  graphics_context_set_stroke_width(ctx, 1);
 }
 
 void draw_shore(GContext *ctx, GRect b, int16_t y) {

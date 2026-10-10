@@ -25,6 +25,7 @@
 #define PERSIST_HISTORY         18  // packed SessionRecord[] via persist_write_data
 #define PERSIST_HISTORY_COUNT   19
 #define PERSIST_TREND           20  // packed TrendData from the phone
+#define PERSIST_REMINDER        21  // minutes after midnight, -1 = off
 
 // ---------------------------------------------------------------------------
 // Breathing presets. Phase lengths in tenths of a second so 5.5 s fits an int.
@@ -43,6 +44,11 @@ typedef struct {
 #define CUSTOM_STEP   5
 #define CUSTOM_MIN_IN 20   // in/out must be at least 2 s; holds may be 0
 #define CUSTOM_MAX    120
+
+// Daily reminder times, minutes after midnight; REMINDER_OFF = none.
+#define REMINDER_OFF (-1)
+#define NUM_REMINDERS 8
+extern const int16_t REMINDERS[NUM_REMINDERS];
 
 // Selectable session lengths in minutes.
 #define NUM_SESSION_LENS 6
@@ -104,6 +110,12 @@ typedef struct {
 typedef enum { BL_OFF, BL_TIMED, BL_ALWAYS, NUM_BL_MODES } BacklightMode;
 #define BL_TIMEOUT_MS 6000
 
+// On a black-and-white screen (flint) every colour lands on black, white or a
+// 50% dither. Dither breaks up text and fills behind text, so everything that
+// is read becomes white, panels become black behind a white outline, and only
+// the scenery -- water, sand, the darker stones -- keeps the dither as texture.
+#define CBW(color, bw) PBL_IF_COLOR_ELSE(color, bw)
+
 // ---------------------------------------------------------------------------
 // Palette — "night tide": a black night sky over teal water, limestone shore,
 // foam that lights up against the dark. The water is the only bright thing on
@@ -111,29 +123,29 @@ typedef enum { BL_OFF, BL_TIMED, BL_ALWAYS, NUM_BL_MODES } BacklightMode;
 // navy-cyan-orange look every other breathing app uses and any orange at all.
 // ---------------------------------------------------------------------------
 #define COL_BG          GColorBlack             // the night sky above the water
-#define COL_PANEL       GColorDarkGray          // 555555 — panels, insets, highlights
+#define COL_PANEL       CBW(GColorDarkGray, GColorBlack)        // 555555 — panels, insets, highlights
 #define COL_TEXT        GColorWhite
-#define COL_DIM         GColorLightGray
-#define COL_ACCENT      GColorIcterine          // FFFF55 — scores, streak, progress
-#define COL_VALUE       GColorCeleste           // AAFFFF — secondary values
-#define COL_HR          GColorMelon             // FFAAAA — a warm pulse colour
+#define COL_DIM         CBW(GColorLightGray, GColorWhite)
+#define COL_ACCENT      CBW(GColorIcterine, GColorWhite)        // FFFF55 — scores, streak, progress
+#define COL_VALUE       CBW(GColorCeleste, GColorWhite)         // AAFFFF — secondary values
+#define COL_HR          CBW(GColorMelon, GColorWhite)           // FFAAAA — a warm pulse colour
 
 // The tide itself: a sunlit layer, the depth below it, and the foam crest.
 #define COL_WATER_TOP   GColorTiffanyBlue       // 00AAAA — just under the surface
 #define COL_WATER_DEEP  GColorMidnightGreen     // 005555 — everything below
-#define COL_FOAM        GColorCeleste           // AAFFFF — the crest line
+#define COL_FOAM        CBW(GColorCeleste, GColorWhite)         // AAFFFF — the crest line
 #define COL_SAND        GColorBrass             // AAAA55 — limestone shore
 
 // Cairn stones.
-#define COL_STONE       GColorLightGray
+#define COL_STONE       CBW(GColorLightGray, GColorWhite)
 #define COL_STONE_DARK  GColorDarkGray
 // Submerged stone: light enough to stand out against both water bands, so the
 // cairn stays visible once the tide has closed over it.
-#define COL_STONE_WET       GColorCadetBlue     // 55AAAA
-#define COL_STONE_WET_GLOW  GColorBrass         // AAAA55 — the lit top stone, drowned
+#define COL_STONE_WET       CBW(GColorCadetBlue, GColorWhite)   // 55AAAA
+#define COL_STONE_WET_GLOW  CBW(GColorBrass, GColorWhite)       // AAAA55 — the lit top stone, drowned
 
 // Phase cues. The water's direction carries most of the meaning; these only
 // tint the phase label.
-#define COL_PHASE_IN    GColorCeleste
-#define COL_PHASE_HOLD  GColorIcterine
-#define COL_PHASE_OUT   GColorTiffanyBlue
+#define COL_PHASE_IN    CBW(GColorCeleste, GColorWhite)
+#define COL_PHASE_HOLD  CBW(GColorIcterine, GColorWhite)
+#define COL_PHASE_OUT   CBW(GColorTiffanyBlue, GColorWhite)

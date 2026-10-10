@@ -101,3 +101,23 @@ pebble clean && pebble build && pebble install --cloudpebble
 `CAIRN_PHASE_TONES` is a diagnostic, not a feature. A single note per phase has
 none of the rise-and-fall shape the breathing cue needs, so even a clean run does
 not make this build shippable — it makes a *designed* short cue worth trying.
+
+## Result — 2026-10-10
+
+Run on a Pebble Time 2 (obelix), firmware 4.40, with the settings above:
+**finished the minute, notes audible**, no freeze, reboot or link drop. The
+notes came across as short ticks or clicks rather than tones — expected for a
+70 ms note at Soft.
+
+Reading: a short cue from the `AppTimer` callback is survivable on 4.40. That
+matches two other observations from the same day — PebbleDiver and PBL-7 play
+`speaker_play_tracks()` cues from their game-tick timers on this watch without
+trouble, and firmware 4.40 includes a fix (2026-07-30) for a reboot when the
+system task queue was full during speaker refill, which fits the original
+symptom. Whether the five-note phrase alone would still fail was not tested;
+the next step is a designed cue, not the old one.
+
+**Outcome.** The breathing phases now play designed samples
+(`tools/gen_sfx.py`, `play_phase()` in `src/c/sfx.c`) and the
+`CAIRN_PHASE_TONES` flag has been removed. To rerun the original experiment,
+check out a version from before that change.

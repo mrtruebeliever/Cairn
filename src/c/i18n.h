@@ -50,7 +50,7 @@ enum {
   S_SETTINGS_TITLE, S_OPT_PRESET, S_OPT_RHYTHM, S_OPT_LEN, S_OPT_SOUND,
   S_OPT_HAPTICS, S_OPT_BACKLIGHT, S_OPT_SHOW_HR, S_OPT_RESET,
   S_ON, S_OFF, S_BL_TIMED, S_BL_ALWAYS,
-  S_SND_SOFT, S_SND_NORMAL, S_SND_LOUD,
+  S_SND_SOFT, S_SND_NORMAL, S_SND_LOUD, S_SND_MUTED,
   S_RESET_CONFIRM, S_SETTINGS_HINT, S_RHYTHM_HINT,
   S_MIN_FMT,           // "%d min"
 
@@ -75,6 +75,9 @@ enum {
   // Trend coaching tips (7/30-day patterns)
   S_TT_SCORE_UP, S_TT_SCORE_DOWN, S_TT_PLATEAU, S_TT_HR_DOWN, S_TT_HR_UP,
   S_TT_STREAK_UP, S_TT_STREAK_BROKEN, S_TT_FEW, S_TT_QUITS, S_TT_PRESET_BEST,
+
+  // Settings, added later (appended so the rows above keep their places)
+  S_OPT_REMINDER,
 
   NUM_STRS
 };

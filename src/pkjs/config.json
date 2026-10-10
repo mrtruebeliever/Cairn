@@ -70,5 +70,28 @@
       { "type": "toggle", "messageKey": "SHOW_HR", "label": "Hartslag tonen", "defaultValue": true }
     ]
   },
+  {
+    "type": "section",
+    "items": [
+      { "type": "heading", "defaultValue": "Herinnering" },
+      {
+        "type": "select",
+        "messageKey": "REMINDER",
+        "label": "Dagelijks om",
+        "description": "Het horloge trilt en laat de klankschaal horen. Heb je die dag al een sessie gedaan, of staat Quiet Time aan, dan blijft het stil.",
+        "defaultValue": "-1",
+        "options": [
+          { "label": "Uit", "value": "-1" },
+          { "label": "07:00", "value": "420" },
+          { "label": "08:00", "value": "480" },
+          { "label": "12:00", "value": "720" },
+          { "label": "17:00", "value": "1020" },
+          { "label": "19:00", "value": "1140" },
+          { "label": "21:00", "value": "1260" },
+          { "label": "22:00", "value": "1320" }
+        ]
+      }
+    ]
+  },
   { "type": "submit", "defaultValue": "Opslaan" }
 ]

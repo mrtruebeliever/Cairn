@@ -1,9 +1,13 @@
 #include "settings.h"
 #include "i18n.h"
+#include "reminder.h"
 
 Settings g_set;
 
 const uint8_t SESSION_LENS[NUM_SESSION_LENS] = {1, 2, 3, 5, 10, 15};
+const int16_t REMINDERS[NUM_REMINDERS] = {
+  REMINDER_OFF, 7 * 60, 8 * 60, 12 * 60, 17 * 60, 19 * 60, 21 * 60, 22 * 60,
+};
 
 // Fixed presets, tenths of a second. Custom lives in g_set.custom.
 static const BreathPattern PRESETS[NUM_PRESETS] = {
@@ -53,6 +57,10 @@ void settings_load(void) {
 
   g_set.show_hr = persist_exists(PERSIST_SHOW_HR)
                     ? persist_read_bool(PERSIST_SHOW_HR) : true;
+
+  g_set.reminder = persist_exists(PERSIST_REMINDER)
+                     ? (int16_t)persist_read_int(PERSIST_REMINDER) : REMINDER_OFF;
+  if (g_set.reminder < REMINDER_OFF || g_set.reminder >= 24 * 60) g_set.reminder = REMINDER_OFF;
 }
 
 void settings_set_preset(uint8_t idx) {
@@ -95,6 +103,20 @@ void settings_set_backlight(int8_t mode) {
 void settings_set_show_hr(bool on) {
   g_set.show_hr = on;
   persist_write_bool(PERSIST_SHOW_HR, on);
+}
+
+void settings_set_reminder(int16_t minutes) {
+  if (minutes < REMINDER_OFF || minutes >= 24 * 60) minutes = REMINDER_OFF;
+  g_set.reminder = minutes;
+  persist_write_int(PERSIST_REMINDER, minutes);
+  reminder_schedule();
+}
+
+void settings_next_reminder(void) {
+  int i = 0;
+  while (i < NUM_REMINDERS && REMINDERS[i] != g_set.reminder) i++;
+  // A time set from the phone that is not in the list steps back to Off.
+  settings_set_reminder(i >= NUM_REMINDERS ? REMINDER_OFF : REMINDERS[(i + 1) % NUM_REMINDERS]);
 }
 
 BreathPattern settings_pattern(void) {

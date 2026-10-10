@@ -14,9 +14,12 @@
 // The tide range is matched to the height of the scenery cairn below, so the
 // surface sweeps across the stack instead of hovering far above it: at high tide
 // the top stone is just awash, at low tide the whole stack is dry.
-#define WATER_HI     112   // surface y at the top of an inhale (high tide)
-#define WATER_LO     194   // surface y at the bottom of an exhale (low tide)
-#define SCENE_STONES 7     // decorative, not the streak — see below
+#define WATER_HI     BY_SIZE(112, 80)    // surface y at the top of an inhale (high tide)
+#define WATER_LO     BY_SIZE(194, 142)   // surface y at the bottom of an exhale (low tide)
+#define SCENE_STONES BY_SIZE(7, 5)       // decorative, not the streak — see below
+#define SCENE_W      BY_SIZE(64, 48)     // the scene cairn's base width
+// Inset of the pause and stop panels; a round screen's sides curve away there.
+#define PANEL_X      PBL_IF_ROUND_ELSE(26, BY_SIZE(6, 3))
 #define PROGRESS_H   3     // session-progress bar along the top edge
 #define WAVE_SPEED   (TRIG_MAX_ANGLE / 90)    // wave drift per tick (~3.6 s/cycle)
 #define SWELL_AMP    3     // px the whole level bobs, so holds are never dead still
@@ -36,6 +39,9 @@ typedef enum { PH_IN, PH_HOLD1, PH_OUT, PH_HOLD2, NUM_PHASES } Phase;
 
 static Window *s_win;
 static Layer *s_lay;
+#if defined(PBL_ROUND)
+static Layer *s_ring;   // the progress ring, full-screen so it reaches the bezel
+#endif
 static AppTimer *s_timer;
 
 static BreathPattern s_pat;
@@ -73,6 +79,7 @@ static uint32_t s_rmssd_sq_sum;
 static uint16_t s_rmssd_n;
 
 static void tick(void *data);
+static int32_t breath_fullness(void);
 static void begin_breathing(void);
 
 // ---------------------------------------------------------------------------
@@ -116,8 +123,13 @@ static bool hr_accessible(void) {
   return (mask & HealthServiceAccessibilityMaskAvailable) != 0;
 }
 
+// hr_accessible() asks the health service, which is too slow to call on every
+// frame; the drawing uses this copy, refreshed with each once-a-second sample.
+static bool s_hr_ok;
+
 static void sample_hr(void) {
-  if (!hr_accessible()) return;
+  s_hr_ok = hr_accessible();
+  if (!s_hr_ok) return;
 
   int bpm = (int)health_service_peek_current_value(HealthMetricHeartRateBPM);
   if (bpm < 30 || bpm > 220) return;   // sensor noise / no contact
@@ -180,6 +192,8 @@ static void begin_breathing(void) {
   cue_for_phase(PH_IN);
 }
 
+static uint8_t s_quiet_frame;
+
 static void stop_timer(void) {
   if (s_timer) {
     app_timer_cancel(s_timer);
@@ -193,6 +207,7 @@ static int16_t seg_avg(int seg) {
 
 static void finish_session(void) {
   stop_timer();
+  backlight_tint_reset();
   close_cycle();
   cue_session_done();
 
@@ -276,6 +291,14 @@ static void tick(void *data) {
     sample_hr();
   }
 
+  // Ended before the phase turns: a session that runs out on a phase boundary
+  // (every minute of Box) would otherwise cue one more inhale, and that sound
+  // still playing is what kept the result screen's bowl from being heard.
+  if (s_elapsed_ms >= s_total_ms) {
+    finish_session();
+    return;
+  }
+
   if (s_in_phase_ms >= s_phase_ms[s_phase]) {
     s_in_phase_ms = 0;
     Phase next = next_used_phase(s_phase);
@@ -285,9 +308,16 @@ static void tick(void *data) {
     if (g_set.bl_mode == BL_TIMED) backlight_touch();
   }
 
-  if (s_elapsed_ms >= s_total_ms) {
-    finish_session();
+  // While a phase sound plays the screen drops to every 4th frame and the
+  // light holds its colour, or the speaker runs dry and the sound stutters
+  // (sfx.h). The tide is easing out of a turn then, so it barely shows.
+  if (sfx_phase_sounding()) {
+    s_quiet_frame++;
     return;
+  } else {
+    s_quiet_frame = 0;
+    // The light breathes with the tide on screen.
+    backlight_tint_breath(breath_fullness());
   }
   layer_mark_dirty(s_lay);
 }
@@ -295,6 +325,57 @@ static void tick(void *data) {
 // ---------------------------------------------------------------------------
 // Drawing
 // ---------------------------------------------------------------------------
+
+// The scene cairn never changes during a session, but its antialiased rounded
+// stones cost ~10 ms a frame on a Time 2 -- a quarter of the frame budget, and
+// a busy CPU is what makes the phase sounds stutter. So it is drawn once, the
+// pixels are copied out of the frame buffer, and every later frame blits them.
+// Colour only: a copy needs the 8-bit frame buffer layout. The copy waits a
+// second: while the window is still sliding in, the frame buffer holds the
+// screen it is replacing, and the first build of this copied the home screen's
+// text along with the stones.
+#define CAIRN_CAPTURE_FRAMES 25
+static GBitmap *s_cairn_bmp;
+static uint8_t s_cairn_frames;
+
+static GRect scene_cairn_rect(GPoint base) {
+  int16_t top = base.y - 2 - SCENE_STONES * 11 - 1;   // 11 = stone pitch (art.c)
+  return GRect(base.x - SCENE_W / 2 - 2, top, SCENE_W + 4, base.y + 2 - top);
+}
+
+#if defined(PBL_COLOR)
+static void capture_scene_cairn(GContext *ctx, GRect r) {
+  GBitmap *fb = graphics_capture_frame_buffer(ctx);
+  if (!fb) return;
+  GBitmap *bmp = gbitmap_create_blank(r.size, GBitmapFormat8Bit);
+  if (bmp) {
+    GPoint off = layer_get_frame(s_lay).origin;
+    uint8_t *dst = gbitmap_get_data(bmp);
+    uint16_t stride = gbitmap_get_bytes_per_row(bmp);
+    for (int16_t y = 0; y < r.size.h; y++) {
+      GBitmapDataRowInfo row = gbitmap_get_data_row_info(fb, off.y + r.origin.y + y);
+      for (int16_t x = 0; x < r.size.w; x++) {
+        int16_t fx = off.x + r.origin.x + x;
+        dst[y * stride + x] = (fx >= row.min_x && fx <= row.max_x) ? row.data[fx] : COL_BG.argb;
+      }
+    }
+  }
+  graphics_release_frame_buffer(ctx, fb);
+  s_cairn_bmp = bmp;
+}
+#endif
+
+static void draw_scene_cairn(GContext *ctx, GPoint base) {
+  GRect r = scene_cairn_rect(base);
+  if (s_cairn_bmp) {
+    graphics_draw_bitmap_in_rect(ctx, s_cairn_bmp, r);
+    return;
+  }
+  draw_cairn(ctx, base, SCENE_STONES, SCENE_W, g_stats.streak >= 7);
+#if defined(PBL_COLOR)
+  if (++s_cairn_frames >= CAIRN_CAPTURE_FRAMES) capture_scene_cairn(ctx, r);
+#endif
+}
 
 // Sine ease-in-out over 0..1000, so the tide glides rather than jerks at the
 // phase boundaries.
@@ -305,21 +386,25 @@ static int32_t ease(int32_t p) {
   return (TRIG_MAX_RATIO - cos_lookup(a)) * 1000 / (2 * TRIG_MAX_RATIO);
 }
 
+// How full the breath is, 0 (breathed out) .. 1000 (breathed in), eased.
+static int32_t breath_fullness(void) {
+  uint32_t len = s_phase_ms[s_phase] ? s_phase_ms[s_phase] : 1;
+  int32_t p = (int32_t)(s_in_phase_ms * 1000 / len);
+  switch (s_phase) {
+    case PH_IN:    return ease(p);
+    case PH_OUT:   return 1000 - ease(p);
+    case PH_HOLD1: return 1000;
+    default:       return 0;
+  }
+}
+
 // Where the water surface sits right now. Breathing in raises it (smaller y),
 // breathing out lets it recede and uncovers the cairn again. On top of the breath
 // the whole level rides a slow swell, so a hold looks like calm water rather than
 // a frozen frame.
 static int16_t current_surface_y(void) {
-  uint32_t len = s_phase_ms[s_phase] ? s_phase_ms[s_phase] : 1;
-  int32_t p = (int32_t)(s_in_phase_ms * 1000 / len);
   const int16_t range = WATER_LO - WATER_HI;
-  int16_t y;
-  switch (s_phase) {
-    case PH_IN:    y = WATER_LO - (int16_t)(range * ease(p) / 1000); break;
-    case PH_OUT:   y = WATER_HI + (int16_t)(range * ease(p) / 1000); break;
-    case PH_HOLD1: y = WATER_HI; break;
-    default:       y = WATER_LO; break;
-  }
+  int16_t y = WATER_LO - (int16_t)(range * breath_fullness() / 1000);
   return y + (int16_t)(sin_lookup(s_wave_phase / 3) * SWELL_AMP / TRIG_MAX_RATIO);
 }
 
@@ -377,21 +462,45 @@ static void draw_priming(GContext *ctx, GRect b) {
   GFont f18  = fonts_get_system_font(FONT_KEY_GOTHIC_18);
   GFont f24b = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
 
-  draw_center(ctx, S(S_HR_SEARCH), f24b, 18, 30, b, COL_TEXT);
-  draw_hr_block(ctx, b, 74, f24b, 11);
+  draw_center(ctx, S(S_HR_SEARCH), BY_SIZE(f24b, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD)),
+              BY_SIZE(18, 8), 30, b, COL_TEXT);
+  draw_hr_block(ctx, b, BY_SIZE(74, 42), f24b, 11);
 
   // A countdown, so the wait never feels open-ended.
   char buf[8];
   uint32_t left = (PRIME_MAX_MS > s_prime_ms ? PRIME_MAX_MS - s_prime_ms + 999 : 0) / 1000;
   snprintf(buf, sizeof(buf), "%d", (int)left);
-  draw_center(ctx, buf, f18, 112, 22, b, COL_DIM);
+  draw_center(ctx, buf, f18, BY_SIZE(112, 78), 22, b, COL_DIM);
 
   // Only nag about the strap once waiting has actually dragged on.
   if (s_prime_ms >= PRIME_HINT_MS && !s_hr_available) {
-    draw_wrapped(ctx, S(S_HR_TIGHTEN), f18, GRect(10, 138, b.size.w - 20, 60), COL_DIM);
+    draw_wrapped(ctx, S(S_HR_TIGHTEN), BY_SIZE(f18, f14),
+                 BY_SIZE(GRect(10, 138, b.size.w - 20, 60), GRect(6, 100, b.size.w - 12, 48)),
+                 COL_DIM);
   }
-  draw_center(ctx, S(S_HR_SKIP), f14, 202, 20, b, COL_DIM);
+  draw_center(ctx, S(S_HR_SKIP), f14, BY_SIZE(202, 148), 20, b, COL_DIM);
 }
+
+#if defined(PBL_ROUND)
+// The session's progress on a round screen, which has no straight top edge for
+// the bar: a ring around the bezel, clockwise from twelve o'clock. It lives in
+// its own full-screen layer because the scene's layer is inset from the top
+// and would clip it there. Thicker than the bar, since the outermost pixels of
+// the panel sit under the bezel.
+#define RING_W (PROGRESS_H + 4)
+
+static void ring_update(Layer *layer, GContext *ctx) {
+  if (s_priming) return;
+  GRect b = layer_get_bounds(layer);
+  graphics_context_set_fill_color(ctx, COL_PANEL);
+  graphics_fill_radial(ctx, b, GOvalScaleModeFitCircle, RING_W, 0, TRIG_MAX_ANGLE);
+  int32_t done_angle = s_total_ms
+      ? (int32_t)((uint64_t)s_elapsed_ms * TRIG_MAX_ANGLE / s_total_ms) : 0;
+  if (done_angle > TRIG_MAX_ANGLE) done_angle = TRIG_MAX_ANGLE;
+  graphics_context_set_fill_color(ctx, COL_ACCENT);
+  graphics_fill_radial(ctx, b, GOvalScaleModeFitCircle, RING_W, 0, done_angle);
+}
+#endif
 
 static void session_update(Layer *layer, GContext *ctx) {
   GRect b = layer_get_bounds(layer);
@@ -409,6 +518,7 @@ static void session_update(Layer *layer, GContext *ctx) {
   }
 
   // Session progress: a thin bar along the very top, the only chrome on screen.
+#if !defined(PBL_ROUND)   // round: see ring_update
   graphics_context_set_fill_color(ctx, COL_PANEL);
   graphics_fill_rect(ctx, GRect(0, 0, b.size.w, PROGRESS_H), 0, GCornerNone);
   int16_t done_w = s_total_ms
@@ -416,19 +526,21 @@ static void session_update(Layer *layer, GContext *ctx) {
   if (done_w > b.size.w) done_w = b.size.w;
   graphics_context_set_fill_color(ctx, COL_ACCENT);
   graphics_fill_rect(ctx, GRect(0, 0, done_w, PROGRESS_H), 0, GCornerNone);
+#endif
 
   // Everything the user reads lives above the highest the water ever gets.
-  draw_center(ctx, phase_label(), f24b, 2, 30, b, phase_color());
+  draw_center(ctx, phase_label(), BY_SIZE(f24b, f18b), BY_SIZE(2, 0), BY_SIZE(30, 22), b,
+              phase_color());
 
   uint32_t left = s_phase_ms[s_phase] > s_in_phase_ms
                     ? (s_phase_ms[s_phase] - s_in_phase_ms + 999) / 1000 : 0;
   char buf[24];
   snprintf(buf, sizeof(buf), "%d", (int)left);
-  draw_center(ctx, buf, f28b, 28, 34, b, COL_TEXT);
+  draw_center(ctx, buf, BY_SIZE(f28b, f24b), BY_SIZE(28, 16), BY_SIZE(34, 30), b, COL_TEXT);
 
   uint32_t rem_s = (s_total_ms > s_elapsed_ms ? s_total_ms - s_elapsed_ms : 0) / 1000;
   snprintf(buf, sizeof(buf), "%d:%02d", (int)(rem_s / 60), (int)(rem_s % 60));
-  draw_center(ctx, buf, f18b, 62, 22, b, COL_DIM);
+  draw_center(ctx, buf, BY_SIZE(f18b, f14), BY_SIZE(62, 44), BY_SIZE(22, 18), b, COL_DIM);
 
   // The shore, the cairn standing on it, and then the tide painted over both —
   // that ordering is what submerges the stones as the level rises.
@@ -441,40 +553,42 @@ static void session_update(Layer *layer, GContext *ctx) {
   // being swallowed on every inhale.
   int16_t surface = current_surface_y();
   draw_shore(ctx, b, WATER_LO);
-  draw_cairn(ctx, GPoint(b.size.w / 2, WATER_LO), SCENE_STONES, 64,
-             g_stats.streak >= 7);
+  draw_scene_cairn(ctx, GPoint(b.size.w / 2, WATER_LO));
   draw_tide(ctx, b, surface, s_wave_phase, b.size.h);
-  draw_cairn_underwater(ctx, GPoint(b.size.w / 2, WATER_LO), SCENE_STONES, 64,
+  draw_cairn_underwater(ctx, GPoint(b.size.w / 2, WATER_LO), SCENE_STONES, SCENE_W,
                         g_stats.streak >= 7, tide_flat_y(surface));
 
   // Live heart rate, drawn after the tide. Shown even before the first reading
   // lands, as an outline heart and a question mark, so the user can see it is
   // still measuring. Drawn last because at the top of an inhale the crest
   // reaches the digits, and the readout has to win that overlap.
-  if (g_set.show_hr && hr_accessible()) {
-    draw_hr_block(ctx, b, 82, f24b, 10);
+  if (g_set.show_hr && s_hr_ok) {
+    draw_hr_block(ctx, b, BY_SIZE(82, 58), BY_SIZE(f24b, f18b), BY_SIZE(10, 7));
   }
 
   if (s_paused && !s_confirm_stop) {
-    GRect panel = GRect(6, 118, b.size.w - 12, 52);
+    const int16_t top = BY_SIZE(118, 84);
+    GRect panel = GRect(PANEL_X, top, b.size.w - 2 * PANEL_X, 52);
     graphics_context_set_fill_color(ctx, COL_PANEL);
     graphics_fill_rect(ctx, panel, 6, GCornersAll);
     graphics_context_set_stroke_color(ctx, COL_TEXT);
     graphics_draw_round_rect(ctx, panel, 6);
-    draw_center(ctx, S(S_PAUSED), f24b, 122, 30, b, COL_ACCENT);
-    draw_center(ctx, S(S_HINT_RESUME), f14, 148, 18, b, COL_TEXT);
+    draw_center(ctx, S(S_PAUSED), f24b, top + 4, 30, b, COL_ACCENT);
+    draw_center(ctx, S(S_HINT_RESUME), f14, top + 30, 18, b, COL_TEXT);
   }
 
   // Stop confirmation, drawn as a panel over the circle.
   if (s_confirm_stop) {
-    GRect panel = GRect(6, 112, b.size.w - 12, 66);
+    const int16_t top = BY_SIZE(112, 80);
+    GRect panel = GRect(PANEL_X, top, b.size.w - 2 * PANEL_X, 66);
     graphics_context_set_fill_color(ctx, COL_PANEL);
     graphics_fill_rect(ctx, panel, 6, GCornersAll);
     graphics_context_set_stroke_color(ctx, COL_TEXT);
     graphics_draw_round_rect(ctx, panel, 6);
-    draw_center(ctx, S(S_STOP_TITLE), f18b, 118, 24, b, COL_TEXT);
+    draw_center(ctx, S(S_STOP_TITLE), f18b, top + 6, 24, b, COL_TEXT);
     graphics_context_set_text_color(ctx, COL_TEXT);
-    graphics_draw_text(ctx, S(S_STOP_HINT), f14, GRect(12, 140, b.size.w - 24, 36),
+    graphics_draw_text(ctx, S(S_STOP_HINT), f14,
+                       GRect(PANEL_X + 6, top + 28, b.size.w - 2 * PANEL_X - 12, 36),
                        GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   }
 }
@@ -487,6 +601,7 @@ static void set_paused(bool paused) {
   s_paused = paused;
   if (paused) {
     stop_timer();
+    backlight_tint_reset();
   } else if (!s_timer) {
     s_timer = app_timer_register(TICK_MS, tick, NULL);
   }
@@ -534,16 +649,31 @@ static void focus_handler(bool in_focus) {
 }
 
 static void sess_load(Window *window) {
+  sfx_phase_prepare();
   Layer *root = window_get_root_layer(window);
-  s_lay = layer_create(layer_get_bounds(root));
+  s_lay = layer_create(screen_frame(root, true));
   layer_set_update_proc(s_lay, session_update);
   layer_add_child(root, s_lay);
+#if defined(PBL_ROUND)
+  s_ring = layer_create(layer_get_bounds(root));
+  layer_set_update_proc(s_ring, ring_update);
+  layer_add_child(root, s_ring);
+#endif
 }
 
 static void sess_unload(Window *window) {
   stop_timer();
+  if (s_cairn_bmp) {
+    gbitmap_destroy(s_cairn_bmp);
+    s_cairn_bmp = NULL;
+  }
+  s_cairn_frames = 0;
+  backlight_tint_reset();
   app_focus_service_unsubscribe();
   layer_destroy(s_lay);
+#if defined(PBL_ROUND)
+  layer_destroy(s_ring);
+#endif
   s_lay = NULL;
   window_destroy(s_win);
   s_win = NULL;

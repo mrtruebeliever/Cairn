@@ -7,3 +7,10 @@
 void backlight_apply(void);
 void backlight_touch(void);
 void backlight_release(void);
+
+// Colour backlight (Time 2; a no-op elsewhere): tints the light along the
+// breath, from dry sand when breathed out (`fullness` 0) to sea blue when
+// breathed in (1000). backlight_tint_reset() hands the colour back to the
+// user's own setting.
+void backlight_tint_breath(int32_t fullness);
+void backlight_tint_reset(void);

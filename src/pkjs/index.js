@@ -1,4 +1,4 @@
-var Clay = require('pebble-clay');
+var Clay = require('@rebble/clay');
 var clayConfig = require('./config.json');
 var clay = new Clay(clayConfig);
 
@@ -244,7 +244,7 @@ Pebble.addEventListener('webviewclosed', function (e) {
     return v ? 1 : 0;
   }
 
-  var simple = ['SETTINGS_PRESET', 'SESSION_LEN', 'SOUND_VOL'];
+  var simple = ['SETTINGS_PRESET', 'SESSION_LEN', 'SOUND_VOL', 'REMINDER'];
   for (var i = 0; i < simple.length; i++) {
     var n = num(simple[i]);
     if (n !== null) out[simple[i]] = n;

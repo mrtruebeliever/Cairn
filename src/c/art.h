@@ -4,6 +4,34 @@
 // Shared drawing helpers. Everything here is primitives — the only bitmap in
 // the app is the launcher menu icon (plus the badge icons, loaded on demand).
 
+// The frame a screen's layer gets. Every screen is laid out for a 228px-tall
+// rectangle; on a round display that layout is centred vertically (the extra
+// width only widens the centred rows), and `to_bottom` lets a screen whose
+// scenery fills downwards -- the session's tide -- run on to the bezel.
+GRect screen_frame(Layer *root, bool to_bottom);
+
+// The frame for the table- and list-like screens, which are laid out column by
+// column for exactly 200x228. On a round display that rectangle is centred, so
+// only what sits in its corners needs a round-specific position.
+GRect panel_frame(Layer *root);
+
+// flint's 144x168 screen gets its own row positions and smaller fonts: the
+// 228px layout does not fit, and scaling its rows would overlap the text.
+// BY_SIZE(full, compact) picks the value for the screen at hand.
+#if PBL_DISPLAY_HEIGHT < 200
+#define COMPACT 1
+// The full-size value is still evaluated (and discarded) so a font fetched only
+// for it does not trip -Wunused-variable on this platform.
+#define BY_SIZE(full, compact) ((void)(full), (compact))
+#else
+#define COMPACT 0
+#define BY_SIZE(full, compact) (full)
+#endif
+
+// Titles hug the left edge on a rectangle; on a round screen the top-left
+// corner is cut off, so they centre instead.
+#define TITLE_ALIGN PBL_IF_ROUND_ELSE(GTextAlignmentCenter, GTextAlignmentLeft)
+
 // Draws text centred horizontally in `b` at row y with height h.
 void draw_center(GContext *ctx, const char *text, GFont font,
                  int16_t y, int16_t h, GRect b, GColor color);

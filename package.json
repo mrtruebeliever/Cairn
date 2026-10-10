@@ -1,13 +1,12 @@
 {
   "name": "cairn",
   "author": "mrtruebeliever",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "license": "MIT",
-  "keywords": ["pebble-app"],
+  "keywords": [
+    "pebble-app"
+  ],
   "private": true,
-  "dependencies": {
-    "pebble-clay": "^1.0.4"
-  },
   "pebble": {
     "displayName": "Cairn",
     "uuid": "56a213b3-5060-463d-8222-380e0b104aa5",
@@ -18,7 +17,9 @@
       "configurable"
     ],
     "targetPlatforms": [
-      "emery"
+      "emery",
+      "gabbro",
+      "flint"
     ],
     "watchapp": {
       "watchface": false
@@ -49,18 +50,55 @@
       "TREND_STREAK",
       "TREND_DIR",
       "TREND_TIP",
-      "TREND_PRESET"
+      "TREND_PRESET",
+      "REMINDER"
     ],
     "resources": {
       "media": [
-        { "type": "png", "name": "IMG_MENU_ICON", "file": "images/menu_icon.png", "menuIcon": true },
-        { "type": "png", "name": "IMG_BADGE_0", "file": "images/badge_0.png" },
-        { "type": "png", "name": "IMG_BADGE_1", "file": "images/badge_1.png" },
-        { "type": "png", "name": "IMG_BADGE_2", "file": "images/badge_2.png" },
-        { "type": "png", "name": "IMG_BADGE_3", "file": "images/badge_3.png" },
-        { "type": "png", "name": "IMG_BADGE_4", "file": "images/badge_4.png" },
-        { "type": "png", "name": "IMG_BADGE_5", "file": "images/badge_5.png" }
+        {
+          "type": "png",
+          "name": "IMG_MENU_ICON",
+          "file": "images/menu_icon.png",
+          "menuIcon": true
+        },
+        { "type": "raw", "name": "SFX_BREATH_IN", "file": "sfx/breath_in.raw" },
+        { "type": "raw", "name": "SFX_BREATH_HOLD", "file": "sfx/breath_hold.raw" },
+        { "type": "raw", "name": "SFX_BREATH_OUT", "file": "sfx/breath_out.raw" },
+        { "type": "raw", "name": "SFX_BOWL", "file": "sfx/bowl.raw" },
+        {
+          "type": "png",
+          "name": "IMG_BADGE_0",
+          "file": "images/badge_0.png"
+        },
+        {
+          "type": "png",
+          "name": "IMG_BADGE_1",
+          "file": "images/badge_1.png"
+        },
+        {
+          "type": "png",
+          "name": "IMG_BADGE_2",
+          "file": "images/badge_2.png"
+        },
+        {
+          "type": "png",
+          "name": "IMG_BADGE_3",
+          "file": "images/badge_3.png"
+        },
+        {
+          "type": "png",
+          "name": "IMG_BADGE_4",
+          "file": "images/badge_4.png"
+        },
+        {
+          "type": "png",
+          "name": "IMG_BADGE_5",
+          "file": "images/badge_5.png"
+        }
       ]
     }
+  },
+  "dependencies": {
+    "@rebble/clay": "^1.1.0"
   }
 }

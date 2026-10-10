@@ -12,9 +12,11 @@
 #include <pebble.h>
 #include "backlight.h"
 #include "comms.h"
+#include "glance.h"
 #include "history_window.h"
 #include "home_window.h"
 #include "insights_window.h"
+#include "reminder.h"
 #include "result_window.h"
 #include "touch_nav.h"
 #include "i18n.h"
@@ -50,15 +52,22 @@ static void init(void) {
   i18n_init();
   settings_load();
   stats_load();
+  // A reminder on a day that already has its session, or during Quiet Time,
+  // closes again unseen. Nothing has been pushed yet, so the stack is empty
+  // and the app exits as soon as the event loop starts.
+  if (reminder_should_skip()) return;
   comms_init();
   hr_sampling_apply();
   backlight_apply();
   home_window_push();
   touch_service_subscribe(touch_dispatch, NULL);
-  cue_app_open();
+  if (reminder_launched()) cue_reminder();
+  else cue_app_open();
 }
 
 static void deinit(void) {
+  reminder_schedule();   // a wakeup is used up once it fires; keep one queued
+  glance_update();
   health_service_events_unsubscribe();
   health_service_set_heart_rate_sample_period(0);
   backlight_release();

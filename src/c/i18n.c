@@ -28,7 +28,7 @@ static const char *TR[NUM_LANGS][NUM_STRS] = {
     "Settings", "Pattern", "Custom rhythm", "Duration", "Sound",
     "Vibration", "Backlight", "Heart rate", "Reset stats",
     "On", "Off", "Timeout", "Always",
-    "Soft", "Normal", "Loud",
+    "Soft", "Normal", "Loud", "Muted",
     "Press again to erase", "SELECT · change  BACK · close",
     "SELECT · next value",
     "%d min",
@@ -66,6 +66,8 @@ static const char *TR[NUM_LANGS][NUM_STRS] = {
     "Quiet week. Even one minute a day keeps the habit alive.",
     "You often stop early. Set a shorter duration so you finish; build up from there.",
     "You score highest with %s - set as your recommendation.",
+
+    "Reminder",
   },
 
   [L_NL] = {
@@ -92,7 +94,7 @@ static const char *TR[NUM_LANGS][NUM_STRS] = {
     "Instellingen", "Patroon", "Eigen ritme", "Duur", "Geluid",
     "Trilling", "Verlichting", "Hartslag", "Stats wissen",
     "Aan", "Uit", "Time-out", "Altijd",
-    "Zacht", "Normaal", "Luid",
+    "Zacht", "Normaal", "Luid", "Gedempt",
     "Nogmaals om te wissen", "SELECT · wijzigen  TERUG · sluiten",
     "SELECT · volgende waarde",
     "%d min",
@@ -130,6 +132,8 @@ static const char *TR[NUM_LANGS][NUM_STRS] = {
     "Rustige week. Zelfs 1 minuut per dag houdt de gewoonte levend.",
     "Je stopt vaak vroeg. Zet de sessieduur korter zodat je 'm afmaakt; bouw daarna op.",
     "Je scoort het hoogst met %s - ingesteld als je aanrader.",
+
+    "Herinnering",
   },
 
   [L_FR] = {
@@ -156,7 +160,7 @@ static const char *TR[NUM_LANGS][NUM_STRS] = {
     "Réglages", "Schéma", "Rythme perso", "Durée", "Son",
     "Vibration", "Éclairage", "Pouls", "Effacer les stats",
     "Activé", "Désactivé", "Minuteur", "Toujours",
-    "Doux", "Normal", "Fort",
+    "Doux", "Normal", "Fort", "Muet",
     "Encore pour effacer", "SELECT · modifier  RETOUR · fermer",
     "SELECT · valeur suivante",
     "%d min",
@@ -194,6 +198,8 @@ static const char *TR[NUM_LANGS][NUM_STRS] = {
     "Semaine calme. Même une minute par jour garde l'habitude vivante.",
     "Tu arrêtes souvent tôt. Réduis la durée pour finir ; augmente ensuite.",
     "Ton meilleur score est avec %s - défini comme recommandation.",
+
+    "Rappel",
   },
 
   [L_DE] = {
@@ -220,7 +226,7 @@ static const char *TR[NUM_LANGS][NUM_STRS] = {
     "Einstellungen", "Muster", "Eigener Takt", "Dauer", "Ton",
     "Vibration", "Beleuchtung", "Puls zeigen", "Statistik löschen",
     "An", "Aus", "Zeitlimit", "Immer",
-    "Leise", "Normal", "Laut",
+    "Leise", "Normal", "Laut", "Stumm",
     "Nochmal zum Löschen", "SELECT · ändern  ZURÜCK · schließen",
     "SELECT · nächster Wert",
     "%d Min",
@@ -258,6 +264,8 @@ static const char *TR[NUM_LANGS][NUM_STRS] = {
     "Ruhige Woche. Schon eine Minute pro Tag hält die Gewohnheit lebendig.",
     "Du hörst oft früh auf. Stelle die Dauer kürzer, damit du fertig wirst.",
     "Am besten schneidest du mit %s ab - als Empfehlung gesetzt.",
+
+    "Erinnerung",
   },
 
   [L_ES] = {
@@ -284,7 +292,7 @@ static const char *TR[NUM_LANGS][NUM_STRS] = {
     "Ajustes", "Patrón", "Ritmo propio", "Duración", "Sonido",
     "Vibración", "Luz", "Mostrar pulso", "Borrar estadísticas",
     "Activado", "Desactivado", "Con tiempo", "Siempre",
-    "Bajo", "Normal", "Alto",
+    "Bajo", "Normal", "Alto", "Silencio",
     "Otra vez para borrar", "SELECT · cambiar  ATRÁS · cerrar",
     "SELECT · valor siguiente",
     "%d min",
@@ -322,6 +330,8 @@ static const char *TR[NUM_LANGS][NUM_STRS] = {
     "Semana tranquila. Incluso un minuto al día mantiene el hábito.",
     "Sueles parar pronto. Pon una duración más corta para terminarla; luego sube.",
     "Tu mejor puntuación es con %s - fijado como recomendación.",
+
+    "Recordatorio",
   },
 };
 

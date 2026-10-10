@@ -6,18 +6,30 @@
 // also what keeps the emulator alive — QEMU has no speaker and any playback
 // exits the app).
 
-// A small chime when the app opens. Silent unless Sound is on.
+// A singing-bowl strike when the app opens. Silent unless Sound is on.
 void cue_app_open(void);
 
-// The phase cues are vibration only: see sfx.c for why the tones went away.
+// The daily breathing reminder: a vibration and two bowl strikes.
+void cue_reminder(void);
+
+// A phase change: a vibration and a short sound, each behind its own setting.
 void cue_phase_in(void);
 void cue_phase_hold(void);
 void cue_phase_out(void);
 
+// Loads the phase sounds into memory. Called when the session window opens, so
+// nothing is read from flash once the breathing has started.
+void sfx_phase_prepare(void);
+
+// True while a phase sound is still playing. The firmware refills the speaker
+// as it goes, and a session redrawing the whole screen every frame and
+// stepping the LED colour starves it: the sound stutters. The session eases off
+// for these half-seconds.
+bool sfx_phase_sounding(void);
+
 // Vibration marking the end of a session. The matching chime is
-// cue_result_chime(), played by the result screen when it appears — the session
-// itself ends inside a timer callback, which is the one place the speaker must
-// not be touched.
+// cue_result_chime(), played by the result screen when it appears, so it sounds
+// with the result rather than under the last breathing cue.
 void cue_session_done(void);
 void cue_result_chime(void);
 void cue_badge(void);

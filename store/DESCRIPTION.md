@@ -39,10 +39,17 @@ FEATURES
 • A growing cairn, six badges, a personal best and your last 20 sessions.
 • 7- and 30-day trends for calm score and resting heart rate, plus a coaching
   line.
-• A distinct haptic pulse per breathing phase, and soft chimes at four volume
-  levels; backlight, vibration and heart-rate display all switchable.
-• Settings on the watch or from the phone (Clay).
-• Made for the Pebble Time 2 (Emery) colour screen; works without the phone.
+• A distinct haptic pulse and a soft tone per breathing phase, and a struck
+  singing bowl to open and close a session, at four volume levels; silent in
+  Quiet Time or with the watch's speaker muted.
+• An optional daily reminder that opens Cairn — skipped once you have
+  breathed that day.
+• Your streak in the app list; on the Pebble Time 2 the colour backlight
+  follows the tide.
+• Backlight, vibration and heart-rate display all switchable; settings on the
+  watch (sized to your text size) or from the phone (Clay).
+• Made for the Pebble Time 2 (Emery) colour screen, also built for the Pebble
+  Round 2 and Pebble 2 Duo; works without the phone.
 • Available in English, Nederlands, Français, Deutsch and Español, following
   your watch's system language.
 
