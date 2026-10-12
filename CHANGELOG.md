@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.1
+
+- New launcher icon: crisp pixel art with every stone outlined, so all four
+  read in the launcher's greys.
+
 ## 1.3.0
 
 - **A button bar instead of the hint line.** The home screen's cycling hint

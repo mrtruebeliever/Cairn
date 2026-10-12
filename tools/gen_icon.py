@@ -1,60 +1,94 @@
 #!/usr/bin/env python3
-"""Generates Cairn's launcher menu icon: four stacked pebbles on a shoreline,
-matching draw_cairn() in src/c/art.c — light/dark grey alternating stones, an
-Icterine top stone (the app's accent) and a Brass shore line, per the "night
-tide" palette in src/c/config.h.
+"""Generates Cairn's launcher menu icon: four stacked stones on a brass
+shore, dark and light grey alternating under an Icterine top stone (the
+app's accent), as in draw_cairn() in src/c/art.c.
+
+The launcher draws menu icons in four greys (black, dark grey, light grey,
+white) on white, so the icon is crisp pixel art in Pebble palette colours
+chosen for their grey level, with every part outlined in black; pale colours
+without an outline would vanish.
 
 Output:
-  resources/images/menu_icon.png   25x25   cairn on transparent
+  resources/images/menu_icon.png   25x25 on transparent
 
-Rendered supersampled and downsampled for clean edges. Needs Pillow:
-    .art-venv/bin/python tools/gen_icon.py
+Run from the project root (needs Pillow):  python3 tools/gen_icon.py
 """
 import os
-from PIL import Image, ImageDraw
 
-SS = 8
-W = 25
+from PIL import Image
 
-LIGHT = (0xAA, 0xAA, 0xAA, 255)   # GColorLightGray
-DARK = (0x55, 0x55, 0x55, 255)    # GColorDarkGray
-ACCENT = (0xFF, 0xFF, 0x55, 255)  # GColorIcterine
-GROUND = (0xAA, 0xAA, 0x55, 255)  # GColorBrass (the limestone shore)
+N = 25
+PAL = {
+    "K": (0x00, 0x00, 0x00), "W": (0xFF, 0xFF, 0xFF), "L": (0xAA, 0xAA, 0xAA),
+    "D": (0x55, 0x55, 0x55), "R": (0xFF, 0x00, 0x00), "r": (0xAA, 0x00, 0x00),
+    "o": (0xFF, 0x55, 0x55), "Y": (0xFF, 0xFF, 0x00), "y": (0xFF, 0xAA, 0x00),
+    "i": (0xFF, 0xFF, 0x55), "A": (0xAA, 0xAA, 0x55), "a": (0x55, 0x55, 0x00),
+    "S": (0xFF, 0xAA, 0x55), "s": (0xFF, 0x55, 0x00), "N": (0xAA, 0x55, 0x00),
+    "n": (0x55, 0x00, 0x00), "b": (0x00, 0x00, 0x55), "B": (0x00, 0x55, 0xAA),
+    "c": (0x00, 0x55, 0xFF), "C": (0xAA, 0xFF, 0xFF), "E": (0x00, 0xFF, 0xAA),
+    "e": (0x00, 0xAA, 0x55), "p": (0x00, 0x55, 0x00), "M": (0x55, 0xAA, 0x00),
+    "Z": (0xAA, 0xFF, 0x55), "T": (0xAA, 0xFF, 0xAA), "m": (0xAA, 0x00, 0xAA),
+    "P": (0x00, 0xAA, 0x00), "G": (0x55, 0xAA, 0xAA), "g": (0x00, 0x55, 0x55),
+}
 
-# (width, height) per stone, bottom first — the same taper as draw_cairn().
-STONES = [(21, 5), (17, 5), (13, 4), (9, 4)]
+
+def disc(cx, cy, r):
+    return {(x, y) for y in range(N) for x in range(N) if (x - cx) ** 2 + (y - cy) ** 2 <= r * r}
 
 
-def draw_cairn(size):
-    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-    d = ImageDraw.Draw(img)
-    s = size / W          # scale from the 25x25 design grid
+def ell(cx, cy, rx, ry):
+    return {(x, y) for y in range(N) for x in range(N)
+            if ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1}
 
-    cx = 12.5 * s
-    ground_y = 23 * s
-    d.line([(2.5 * s, ground_y), (22.5 * s, ground_y)], fill=GROUND, width=int(1.5 * s))
 
-    y = ground_y - 1.0 * s
-    for i, (w, h) in enumerate(STONES):
-        top = i == len(STONES) - 1
-        fill = ACCENT if top else (LIGHT if i % 2 == 0 else DARK)
-        d.rounded_rectangle(
-            [cx - w * s / 2, y - h * s, cx + w * s / 2, y],
-            radius=1.6 * s, fill=fill,
-        )
-        y -= (h + 0.6) * s
+def rect(x0, y0, x1, y1):
+    return {(x, y) for y in range(y0, y1 + 1) for x in range(x0, x1 + 1)}
+
+
+def part(g, cells, shade, diag=False):
+    nb = [(1, 0), (-1, 0), (0, 1), (0, -1)] + ([(1, 1), (-1, -1), (1, -1), (-1, 1)] if diag else [])
+    for (x, y) in cells:
+        for dx, dy in nb:
+            p = (x + dx, y + dy)
+            if p not in cells and 0 <= p[0] < N and 0 <= p[1] < N:
+                g[p[1]][p[0]] = "K"
+    for (x, y) in cells:
+        if 0 <= x < N and 0 <= y < N:
+            g[y][x] = shade(x, y) if callable(shade) else shade
+
+
+def new():
+    return [["."] * N for _ in range(N)]
+
+
+def to_img(g):
+    img = Image.new("RGBA", (N, N), (0, 0, 0, 0))
+    for y in range(N):
+        for x in range(N):
+            if g[y][x] != ".":
+                img.putpixel((x, y), PAL[g[y][x]] + (255,))
     return img
 
 
+
+def art():
+    g = new()
+    # shore
+    part(g, rect(0, 22, 24, 23), lambda x, y: "A" if y == 22 else "a")
+    stones = [(12, 18.5, 10.5, 3.2, "D"), (12, 13, 8.2, 2.7, "L"),
+              (12, 8.2, 6.2, 2.4, "D"), (12, 3.8, 4.2, 2.2, "i")]
+    for cx, cy, rx, ry, c in stones:
+        cells = ell(cx, cy, rx, ry)
+        hl = "W" if c in "Li" else "L"
+        part(g, cells, lambda x, y, c=c, cx=cx, cy=cy, rx=rx, ry=ry, hl=hl:
+             hl if (y < cy - ry * 0.35 and x < cx - rx * 0.1 and x > cx - rx * 0.75) else c)
+    return g
+
+
 def main():
-    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    out_dir = os.path.join(root, "resources", "images")
-    os.makedirs(out_dir, exist_ok=True)
-    big = draw_cairn(W * SS)
-    icon = big.resize((W, W), Image.LANCZOS)
-    path = os.path.join(out_dir, "menu_icon.png")
-    icon.save(path)
-    print("wrote", path)
+    os.makedirs("resources/images", exist_ok=True)
+    to_img(art()).save("resources/images/menu_icon.png")
+    print("wrote resources/images/menu_icon.png (25x25)")
 
 
 if __name__ == "__main__":
