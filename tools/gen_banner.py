@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Generates Cairn's appstore banner as pixel art, in the style of the app's own
-stones and water (src/c/art.c) and of the PebbleDiver / PBL-7 banners: drawn
-on a 180x80 canvas and scaled up x4 with NEAREST so it stays crisp.
+"""Generates Cairn's appstore art as pixel art, in the style of the app's own
+stones and water (src/c/art.c) and of the PebbleDiver / PBL-7 art: drawn on a
+small canvas and scaled up with NEAREST so it stays crisp.
 
 Output:
-  store/banner-720x320.png
-
-The store icons still come from tools/gen_store.py.
+  store/banner-720x320.png   180x80 canvas, x4
+  store/icon-80.png          40x40 canvas, x2
+  store/icon-144.png         36x36 canvas, x4
 
 Run from the project root (needs Pillow):  python3 tools/gen_banner.py
 """
@@ -37,7 +37,7 @@ BAND_TOP_H = 9        # the sunlit layer, scaled down from the app's 22 px
 
 
 def put(img, x, y, c):
-    if 0 <= x < W and 0 <= y < H:
+    if 0 <= x < img.width and 0 <= y < img.height:
         img.putpixel((x, y), C[c])
 
 
@@ -101,29 +101,32 @@ INK = {
 }
 
 
-def inset(i, r, right):
-    v = SH if r < 0 or r >= SH else STONE_IN[r]
+def inset(i, r, right, tbl=STONE_IN):
+    sh = len(tbl)
+    v = sh if r < 0 or r >= sh else tbl[r]
     lean = ((i * 5 + 2) % 3 == 0) == right
     if lean and r <= 1:
         v += 2 - r
-    elif lean and r >= SH - 2:
-        v += r - (SH - 3)
+    elif lean and r >= sh - 2:
+        v += r - (sh - 3)
     return v
 
 
-def stone(img, x, y, w, i, ink, flip=False, every_other=False):
+def stone(img, x, y, w, i, ink, flip=False, every_other=False, tbl=STONE_IN):
     hi, base, shade, outline = INK[ink]
+    SH = len(tbl)
+    inset_ = lambda ii, r, right: inset(ii, r, right, tbl)
     rr_ = range(SH)
     for r in rr_:
         yy = y + (SH - 1 - r if flip else r)
         if every_other and r % 2:
             continue
-        l, rt = x + inset(i, r, False), x + w - 1 - inset(i, r, True)
+        l, rt = x + inset_(i, r, False), x + w - 1 - inset_(i, r, True)
         row(img, l, rt, yy, outline)
         if r in (0, SH - 1):
             continue
-        il = x + 1 + max(inset(i, r - 1, False), inset(i, r, False), inset(i, r + 1, False))
-        ir = x + w - 2 - max(inset(i, r - 1, True), inset(i, r, True), inset(i, r + 1, True))
+        il = x + 1 + max(inset_(i, r - 1, False), inset_(i, r, False), inset_(i, r + 1, False))
+        ir = x + w - 2 - max(inset_(i, r - 1, True), inset_(i, r, True), inset_(i, r + 1, True))
         if ir < il:
             continue
         span = ir - il + 1
@@ -192,19 +195,19 @@ def water(img):
 def text(img, xy, s, size, fill, shade=None, shadow=(0x00, 0x55, 0x55)):
     """Thresholded bold text with a black outline and a drop shadow."""
     f = ImageFont.truetype(FONT, size)
-    mask = Image.new("L", (W, H), 0)
+    mask = Image.new("L", img.size, 0)
     ImageDraw.Draw(mask).text(xy, s, font=f, fill=255)
     mp = mask.point(lambda v: 255 if v > 127 else 0).load()
     ink, outline = {}, set()
-    for y in range(H):
-        for x in range(W):
+    for y in range(img.height):
+        for x in range(img.width):
             if mp[x, y]:
                 ink[(x, y)] = shade if shade and y > xy[1] + size * 0.55 else fill
                 for dx in (-1, 0, 1):
                     for dy in (-1, 0, 1):
                         outline.add((x + dx, y + dy))
     for (x, y) in outline:
-        if 0 <= x + 1 < W and 0 <= y + 2 < H:
+        if 0 <= x + 1 < img.width and 0 <= y + 2 < img.height:
             img.putpixel((x + 1, y + 2), shadow)
     for (x, y) in outline:
         put(img, x, y, "K")
@@ -224,11 +227,56 @@ def banner():
     return img
 
 
+ICON_IN = [3, 1, 0, 0, 0, 0, 1, 3]  # eight rows per stone, so each reads as a pebble
+
+
+def icon(n):
+    """The store icon: a night sky, the cairn, a strip of tide at its foot."""
+    img = Image.new("RGB", (n, n))
+    for y in range(n):
+        row(img, 0, n - 1, y, "K")
+    k = n / 36.0
+    for x, y, c in ((4, 5, "L"), (31, 4, "W"), (32, 14, "D"), (3, 17, "D")):
+        put(img, round(x * k), round(y * k), c)
+
+    surface = round(29 * k)
+    sand = surface - 1
+    row(img, 0, n - 1, sand, "A")
+    cx = n // 2
+    widths = [round(w * k) for w in (26, 22, 18, 14)]
+    inks = ["light", "dark", "light", "glow"]
+    jitter = [0, 1, -1, 0]
+    # Each stone rests on the one below: their outlines share two rows.
+    pitch = len(ICON_IN) - 2
+    for i, (w, ink) in enumerate(zip(widths, inks)):
+        y = sand - 1 - i * pitch - (len(ICON_IN) - 1)
+        stone(img, cx - w // 2 + jitter[i], y, w, i, ink, tbl=ICON_IN)
+
+    seam = surface + max(3, round(4 * k))
+    for x in range(n):
+        wy = surface + round(math.sin(x * 2 * math.pi / (12 * k)) * 0.8 * k)
+        for y in range(wy, n):
+            put(img, x, y, "T" if y < seam else "g")
+    for x, dy, w in ((3, 2, 3), (n - 10, 3, 3), (n // 2 - 3, 1, 2)):
+        row(img, round(x * k), round(x * k) + round(w * k) - 1, surface + dy, "C")
+    prev = surface
+    for x in range(n):
+        wy = surface + round(math.sin(x * 2 * math.pi / (12 * k)) * 0.8 * k)
+        for y in range(min(wy, prev) - 1, max(wy, prev)):
+            put(img, x, y, "C")
+        prev = wy
+    return img
+
+
 def main():
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    out = os.path.join(root, "store", "banner-720x320.png")
+    store = os.path.join(root, "store")
+    out = os.path.join(store, "banner-720x320.png")
     banner().resize((W * SCALE, H * SCALE), Image.NEAREST).save(out)
     print("wrote", out)
+    icon(40).resize((80, 80), Image.NEAREST).save(os.path.join(store, "icon-80.png"))
+    icon(36).resize((144, 144), Image.NEAREST).save(os.path.join(store, "icon-144.png"))
+    print("wrote store/icon-80.png, store/icon-144.png")
 
 
 if __name__ == "__main__":

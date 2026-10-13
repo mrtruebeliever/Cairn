@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Generates Cairn's launcher menu icon: four stacked stones on a brass
+"""Generates Cairn's launcher menu icon: four pixel pebbles stacked on a brass
 shore, dark and light grey alternating under an Icterine top stone (the
-app's accent), as in draw_cairn() in src/c/art.c.
+app's accent), drawn like draw_cairn() in src/c/art.c.
 
 The launcher draws menu icons in four greys (black, dark grey, light grey,
 white) on white, so the icon is crisp pixel art in Pebble palette colours
@@ -71,17 +71,45 @@ def to_img(g):
 
 
 
+# Pixel pebbles, as drawn in the app (src/c/art.c): an outline, a highlight on
+# the upper left, a shadow from the lower right. Six rows each, resting on one
+# another with their outlines sharing two rows.
+STONE_IN = [2, 1, 0, 0, 1, 2]
+INK = {            # highlight, body, shadow -- grey levels kept apart for the launcher
+    "light": ("W", "L", "D"),
+    "dark": ("L", "D", "K"),
+    "glow": ("W", "i", "A"),
+}
+
+
+def stone(g, x, y, w, ink):
+    hi, base, shade = INK[ink]
+    sh = len(STONE_IN)
+    for r in range(sh):
+        l, rt = x + STONE_IN[r], x + w - 1 - STONE_IN[r]
+        for xx in range(l, rt + 1):
+            g[y + r][xx] = "K"
+        if r in (0, sh - 1):
+            continue
+        il = x + 1 + max(STONE_IN[r - 1], STONE_IN[r], STONE_IN[r + 1])
+        ir = x + w - 2 - max(STONE_IN[r - 1], STONE_IN[r], STONE_IN[r + 1])
+        for xx in range(il, ir + 1):
+            if r == 1:
+                g[y + r][xx] = hi if xx < il + (ir - il) * 2 // 3 + 1 else base
+            elif r >= sh - 2:
+                g[y + r][xx] = shade if xx >= (il + ir) // 2 else base
+            else:
+                g[y + r][xx] = base
+
+
 def art():
     g = new()
     # shore
     part(g, rect(0, 22, 24, 23), lambda x, y: "A" if y == 22 else "a")
-    stones = [(12, 18.5, 10.5, 3.2, "D"), (12, 13, 8.2, 2.7, "L"),
-              (12, 8.2, 6.2, 2.4, "D"), (12, 3.8, 4.2, 2.2, "i")]
-    for cx, cy, rx, ry, c in stones:
-        cells = ell(cx, cy, rx, ry)
-        hl = "W" if c in "Li" else "L"
-        part(g, cells, lambda x, y, c=c, cx=cx, cy=cy, rx=rx, ry=ry, hl=hl:
-             hl if (y < cy - ry * 0.35 and x < cx - rx * 0.1 and x > cx - rx * 0.75) else c)
+    # four stones, widest at the bottom, a pixel off-centre each
+    for i, (w, ink, dx) in enumerate([(23, "dark", 0), (19, "light", 1),
+                                      (15, "dark", -1), (11, "glow", 0)]):
+        stone(g, (N - w) // 2 + dx, 16 - 4 * i, w, ink)
     return g
 
 

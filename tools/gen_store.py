@@ -93,6 +93,9 @@ def cairn_box(img):
 
 
 def main():
+    # Since 1.3.2 the store icons are pixel art from tools/gen_banner.py; running
+    # this would put the old ones back.
+    sys.exit("superseded: run tools/gen_banner.py (store art) and tools/gen_icon.py (launcher icon)")
     icon_src = os.path.join(ART, "store_icon_src.png")
     if not os.path.exists(icon_src):
         sys.exit("missing %s — see tools/CHATGPT_PROMPTS.md, prompt 3" % icon_src)
