@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Turns the generated store art into the files the appstore listing needs.
 
-Input (see tools/CHATGPT_PROMPTS.md, prompts 3 and 4):
+Input (see tools/CHATGPT_PROMPTS.md, prompt 3):
   tools/art/store_icon_src.png     square night-tide scene with the cairn
-  tools/art/store_banner_src.png   wide night-tide scene, cairn right of centre
 
 Output:
   store/icon-80.png        80x80
   store/icon-144.png       144x144
-  store/banner-720x320.png 720x320
+
+The banner is pixel art from tools/gen_banner.py since 1.3.2.
 
 The icon source frames the cairn small in a wide scene, which turns to soup at
 80 px, so it is cropped to a square around the cairn (found by locating the
@@ -94,10 +94,8 @@ def cairn_box(img):
 
 def main():
     icon_src = os.path.join(ART, "store_icon_src.png")
-    banner_src = os.path.join(ART, "store_banner_src.png")
-    for p in (icon_src, banner_src):
-        if not os.path.exists(p):
-            sys.exit("missing %s — see tools/CHATGPT_PROMPTS.md, prompts 3 and 4" % p)
+    if not os.path.exists(icon_src):
+        sys.exit("missing %s — see tools/CHATGPT_PROMPTS.md, prompt 3" % icon_src)
     os.makedirs(OUT, exist_ok=True)
 
     scene = trim_white(Image.open(icon_src).convert("RGB"))
@@ -106,21 +104,6 @@ def main():
         path = os.path.join(OUT, "icon-%d.png" % size)
         icon.resize((size, size), Image.LANCZOS).save(path)
         print("wrote", path)
-
-    # The banner arrives at whatever wide ratio the generator offered; crop the
-    # centre band to 720x320's ratio rather than squashing the scene.
-    banner = trim_white(Image.open(banner_src).convert("RGB"))
-    w, h = banner.size
-    want = 720 / 320
-    if w / h > want:
-        new_w = int(h * want)
-        banner = banner.crop(((w - new_w) // 2, 0, (w - new_w) // 2 + new_w, h))
-    else:
-        new_h = int(w / want)
-        banner = banner.crop((0, (h - new_h) // 2, w, (h - new_h) // 2 + new_h))
-    path = os.path.join(OUT, "banner-720x320.png")
-    banner.resize((720, 320), Image.LANCZOS).save(path)
-    print("wrote", path)
 
 
 if __name__ == "__main__":
