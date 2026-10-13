@@ -26,6 +26,7 @@
 #define PERSIST_HISTORY_COUNT   19
 #define PERSIST_TREND           20  // packed TrendData from the phone
 #define PERSIST_REMINDER        21  // minutes after midnight, -1 = off
+#define PERSIST_PHASE_SOUND     22  // breath sounds during a session
 
 // ---------------------------------------------------------------------------
 // Breathing presets. Phase lengths in tenths of a second so 5.5 s fits an int.

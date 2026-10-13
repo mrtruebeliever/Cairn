@@ -13,7 +13,7 @@
 #include "sfx.h"
 #include "stats.h"
 
-enum { ROW_PRESET, ROW_RHYTHM, ROW_LEN, ROW_SOUND, ROW_HAPTICS,
+enum { ROW_PRESET, ROW_RHYTHM, ROW_LEN, ROW_SOUND, ROW_PHASE_SOUND, ROW_HAPTICS,
        ROW_BACKLIGHT, ROW_SHOW_HR, ROW_REMINDER, ROW_RESET, NUM_ROWS };
 
 // The rows follow the watch's text size (Settings -> Display), one step either
@@ -73,6 +73,7 @@ static const char *row_label(int row) {
     case ROW_RHYTHM:    return S(S_OPT_RHYTHM);
     case ROW_LEN:       return S(S_OPT_LEN);
     case ROW_SOUND:     return S(S_OPT_SOUND);
+    case ROW_PHASE_SOUND: return S(S_OPT_PHASE_SOUND);
     case ROW_HAPTICS:   return S(S_OPT_HAPTICS);
     case ROW_BACKLIGHT: return S(S_OPT_BACKLIGHT);
     case ROW_SHOW_HR:   return S(S_OPT_SHOW_HR);
@@ -107,6 +108,9 @@ static bool row_value(int row, char *buf, size_t len) {
                              : g_set.sound_vol == 1 ? S(S_SND_SOFT)
                              : g_set.sound_vol == 2 ? S(S_SND_NORMAL)
                                                     : S(S_SND_LOUD));
+      return true;
+    case ROW_PHASE_SOUND:
+      snprintf(buf, len, "%s", g_set.phase_sound ? S(S_ON) : S(S_OFF));
       return true;
     case ROW_HAPTICS:
       snprintf(buf, len, "%s", g_set.haptics_on ? S(S_ON) : S(S_OFF));
@@ -255,6 +259,9 @@ static void settings_update(Layer *layer, GContext *ctx) {
 
     bool active = true;
     if (i == ROW_SOUND) active = g_set.sound_vol > 0 && !speaker_is_muted();
+    // Breath sounds play at the Sound level, so they are dimmed with it.
+    else if (i == ROW_PHASE_SOUND) active = g_set.phase_sound && g_set.sound_vol > 0
+                                            && !speaker_is_muted();
     else if (i == ROW_HAPTICS) active = g_set.haptics_on;
     else if (i == ROW_BACKLIGHT) active = g_set.bl_mode != BL_OFF;
     else if (i == ROW_SHOW_HR) active = g_set.show_hr;
@@ -316,9 +323,12 @@ static void activate_row(void) {
       settings_set_sound(g_set.sound_vol + 1);
       if (g_set.sound_vol) cue_sample();
       break;
+    case ROW_PHASE_SOUND:
+      settings_set_phase_sound(!g_set.phase_sound);
+      break;
     case ROW_HAPTICS:
       settings_set_haptics(!g_set.haptics_on);
-      if (g_set.haptics_on) vibes_short_pulse();
+      if (g_set.haptics_on) cue_phase_sample();
       break;
     case ROW_BACKLIGHT:
       settings_set_backlight(g_set.bl_mode + 1);

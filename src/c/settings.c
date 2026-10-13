@@ -52,6 +52,13 @@ void settings_load(void) {
   g_set.haptics_on = persist_exists(PERSIST_HAPTICS_ON)
                        ? persist_read_bool(PERSIST_HAPTICS_ON) : true;
 
+  // Off by default: on a Time 2 every sound ends in a tick when the firmware
+  // cuts the amplifier (see sfx.c), and a tick every few seconds is the
+  // opposite of calming. The vibration carries the phases; the sounds that
+  // frame a session (open, result, badge, reminder) still follow Sound.
+  g_set.phase_sound = persist_exists(PERSIST_PHASE_SOUND)
+                        ? persist_read_bool(PERSIST_PHASE_SOUND) : false;
+
   g_set.bl_mode = read_int_or(PERSIST_BL_MODE, BL_TIMED);
   if (g_set.bl_mode < 0 || g_set.bl_mode >= NUM_BL_MODES) g_set.bl_mode = BL_TIMED;
 
@@ -93,6 +100,11 @@ void settings_set_sound(int8_t vol) {
 void settings_set_haptics(bool on) {
   g_set.haptics_on = on;
   persist_write_bool(PERSIST_HAPTICS_ON, on);
+}
+
+void settings_set_phase_sound(bool on) {
+  g_set.phase_sound = on;
+  persist_write_bool(PERSIST_PHASE_SOUND, on);
 }
 
 void settings_set_backlight(int8_t mode) {

@@ -60,6 +60,7 @@ static void apply_settings(DictionaryIterator *iter, bool *changed) {
   }
   if (tuple_int(iter, MESSAGE_KEY_SOUND_VOL, &v))  { settings_set_sound((int8_t)v); *changed = true; }
   if (tuple_int(iter, MESSAGE_KEY_HAPTICS_ON, &v)) { settings_set_haptics(v != 0); *changed = true; }
+  if (tuple_int(iter, MESSAGE_KEY_PHASE_SOUND, &v)) { settings_set_phase_sound(v != 0); *changed = true; }
   if (tuple_int(iter, MESSAGE_KEY_REMINDER, &v))   { settings_set_reminder((int16_t)v); *changed = true; }
   if (tuple_int(iter, MESSAGE_KEY_SHOW_HR, &v)) {
     settings_set_show_hr(v != 0);

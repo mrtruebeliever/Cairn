@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.3.2
+
+- **Quiet sessions by default.** The breath sounds during a session are a
+  setting of their own now, Breath sound (Settings, or "Ademgeluid tijdens
+  sessie" on the phone), and it starts Off: on a Time 2 every sound ends in a
+  faint tick, and one every few seconds is not calming. Opening the app, the
+  result, badges and the reminder keep their singing bowl.
+- **Vibrations you can tell apart.** A short tap to breathe in, two light ticks
+  to hold, a long pull to breathe out. Turning Vibration on in Settings plays
+  the tap and the pull back to back.
+- **The tide keeps moving through every turn.** It used to stand still while a
+  phase sound played; without the sound it now runs smooth throughout, and
+  with Breath sound on it slows down instead of stopping.
+- **Pixel-art cairn and water**, in the style of PebbleDiver and PBL-7: outlined
+  pebbles with a highlight and a shadow, stacked a little off-centre, and water
+  with drifting glints, a stepped seam into the deep and streaks of light
+  below.
+
 ## 1.3.1
 
 - New launcher icon: crisp pixel art with every stone outlined, so all four

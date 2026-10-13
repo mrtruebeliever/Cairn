@@ -84,16 +84,21 @@ static void play(const SpeakerNote *notes, uint32_t count) {
 }
 
 // Phase haptics differ per phase so the pattern is recognizable eyes-closed:
-// one nudge to breathe in, a double tick to hold, a longer pull to breathe out.
+// a short tap to breathe in, two light ticks to hold, a long pull to breathe
+// out. They are the main cue now that the breath sounds are off by default, so
+// in and out are kept far apart in length -- 60 ms against 140 ms was too close
+// to tell apart on the wrist.
 static void vibe(const uint32_t *segments, uint32_t count) {
   if (!g_set.haptics_on) return;
   VibePattern pat = {.durations = segments, .num_segments = count};
   vibes_enqueue_custom_pattern(pat);
 }
 
-static const uint32_t VIB_IN[]   = {60};
-static const uint32_t VIB_HOLD[] = {25, 90, 25};
-static const uint32_t VIB_OUT[]  = {140};
+static const uint32_t VIB_IN[]   = {45};
+static const uint32_t VIB_HOLD[] = {25, 110, 25};
+static const uint32_t VIB_OUT[]  = {300};
+// In, then out: what turning Vibration on in Settings plays.
+static const uint32_t VIB_SAMPLE[] = {45, 700, 300};
 static const uint32_t VIB_DONE[] = {90, 120, 90, 120, 220};
 
 // The breathing phases are samples from tools/gen_sfx.py rather than notes: a
@@ -155,7 +160,8 @@ static uint32_t load_into(uint8_t *buf, uint32_t cap, int phase) {
 }
 
 void sfx_phase_prepare(void) {
-  if (s_phase_prepared) return;
+  // Breath sounds off: keep the 25 KB for the screens.
+  if (s_phase_prepared || !g_set.phase_sound) return;
   s_phase_prepared = true;
   uint32_t size[PS_COUNT], total = 0, cap = 0;
   for (int i = 0; i < PS_COUNT; i++) {
@@ -179,6 +185,7 @@ void sfx_phase_prepare(void) {
 }
 
 static void play_phase(int phase) {
+  if (!g_set.phase_sound) return;
   uint8_t level = sound_level();
   if (!level) return;
   uint64_t now = now_ms();
@@ -369,3 +376,5 @@ void cue_deny(void) {
 }
 
 void cue_sample(void) { play(SFX_OK, SFX_N(SFX_OK)); }
+
+void cue_phase_sample(void) { vibe(VIB_SAMPLE, SFX_N(VIB_SAMPLE)); }

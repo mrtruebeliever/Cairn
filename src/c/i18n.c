@@ -68,6 +68,7 @@ static const char *TR[NUM_LANGS][NUM_STRS] = {
     "You score highest with %s - set as your recommendation.",
 
     "Reminder",
+    "Breath sound",
   },
 
   [L_NL] = {
@@ -134,6 +135,7 @@ static const char *TR[NUM_LANGS][NUM_STRS] = {
     "Je scoort het hoogst met %s - ingesteld als je aanrader.",
 
     "Herinnering",
+    "Ademgeluid",
   },
 
   [L_FR] = {
@@ -200,6 +202,7 @@ static const char *TR[NUM_LANGS][NUM_STRS] = {
     "Ton meilleur score est avec %s - défini comme recommandation.",
 
     "Rappel",
+    "Son du souffle",
   },
 
   [L_DE] = {
@@ -266,6 +269,7 @@ static const char *TR[NUM_LANGS][NUM_STRS] = {
     "Am besten schneidest du mit %s ab - als Empfehlung gesetzt.",
 
     "Erinnerung",
+    "Atemklang",
   },
 
   [L_ES] = {
@@ -332,6 +336,7 @@ static const char *TR[NUM_LANGS][NUM_STRS] = {
     "Tu mejor puntuación es con %s - fijado como recomendación.",
 
     "Recordatorio",
+    "Sonido resp.",
   },
 };
 

@@ -254,7 +254,7 @@ Pebble.addEventListener('webviewclosed', function (e) {
     var t = num(tenths[i]);
     if (t !== null) out[tenths[i]] = Math.round(t * 10);
   }
-  var flags = ['HAPTICS_ON', 'SHOW_HR'];
+  var flags = ['HAPTICS_ON', 'PHASE_SOUND', 'SHOW_HR'];
   for (i = 0; i < flags.length; i++) {
     var b = bool(flags[i]);
     if (b !== null) out[flags[i]] = b;

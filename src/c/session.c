@@ -193,6 +193,7 @@ static void begin_breathing(void) {
 }
 
 static uint8_t s_quiet_frame;
+#define QUIET_FRAME_EVERY 4
 
 static void stop_timer(void) {
   if (s_timer) {
@@ -308,12 +309,13 @@ static void tick(void *data) {
     if (g_set.bl_mode == BL_TIMED) backlight_touch();
   }
 
-  // While a phase sound plays the screen drops to every 4th frame and the
-  // light holds its colour, or the speaker runs dry and the sound stutters
-  // (sfx.h). The tide is easing out of a turn then, so it barely shows.
+  // While a breath sound plays (only with Breath sound on) the screen drops to
+  // every 4th frame and the light holds its colour, or the speaker runs dry and
+  // the sound stutters (sfx.h). It used to skip every frame instead, which left
+  // the tide standing still through each turn. Without the sound nothing is
+  // skipped at all.
   if (sfx_phase_sounding()) {
-    s_quiet_frame++;
-    return;
+    if (++s_quiet_frame % QUIET_FRAME_EVERY) return;
   } else {
     s_quiet_frame = 0;
     // The light breathes with the tide on screen.

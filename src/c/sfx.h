@@ -12,7 +12,8 @@ void cue_app_open(void);
 // The daily breathing reminder: a vibration and two bowl strikes.
 void cue_reminder(void);
 
-// A phase change: a vibration and a short sound, each behind its own setting.
+// A phase change: a vibration and a short sound, each behind its own setting
+// (the sound behind Breath sound, off by default, as well as Sound).
 void cue_phase_in(void);
 void cue_phase_hold(void);
 void cue_phase_out(void);
@@ -38,3 +39,6 @@ void cue_deny(void);
 
 // A sample blip at the current volume, for the Sound row in Settings.
 void cue_sample(void);
+
+// The inhale and exhale vibrations back to back, for the Vibration row.
+void cue_phase_sample(void);

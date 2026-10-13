@@ -66,6 +66,7 @@
           { "label": "Luid", "value": "3" }
         ]
       },
+      { "type": "toggle", "messageKey": "PHASE_SOUND", "label": "Ademgeluid tijdens sessie", "description": "Een klank bij elke fasewissel, op het niveau van Geluid. Standaard uit: de trilling geeft het ritme al aan.", "defaultValue": false },
       { "type": "toggle", "messageKey": "HAPTICS_ON", "label": "Trilling bij fasewissel", "defaultValue": true },
       { "type": "toggle", "messageKey": "SHOW_HR", "label": "Hartslag tonen", "defaultValue": true }
     ]

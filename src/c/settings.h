@@ -9,6 +9,7 @@ typedef struct {
   int8_t   sound_vol;     // 0=Off 1=Soft 2=Normal 3=Loud (default Soft; build
                           // with CAIRN_MUTE=1 for emulator work, see sfx.c)
   bool     haptics_on;
+  bool     phase_sound;   // sounds on the breathing phases (default off)
   int8_t   bl_mode;       // BacklightMode
   bool     show_hr;
   int16_t  reminder;      // minutes after midnight, REMINDER_OFF = none
@@ -25,6 +26,7 @@ void settings_set_custom(int slot, int32_t tenths);   // wraps at both ends
 void settings_set_len(uint8_t idx);
 void settings_set_sound(int8_t vol);
 void settings_set_haptics(bool on);
+void settings_set_phase_sound(bool on);
 void settings_set_backlight(int8_t mode);
 void settings_set_show_hr(bool on);
 // Also (re)schedules the reminder's wakeup.

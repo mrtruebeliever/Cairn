@@ -78,6 +78,7 @@ enum {
 
   // Settings, added later (appended so the rows above keep their places)
   S_OPT_REMINDER,
+  S_OPT_PHASE_SOUND,
 
   NUM_STRS
 };

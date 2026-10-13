@@ -39,9 +39,10 @@ FEATURES
 • A growing cairn, six badges, a personal best and your last 20 sessions.
 • 7- and 30-day trends for calm score and resting heart rate, plus a coaching
   line.
-• A distinct haptic pulse and a soft tone per breathing phase, and a struck
-  singing bowl to open and close a session, at four volume levels; silent in
-  Quiet Time or with the watch's speaker muted.
+• A distinct haptic pulse per breathing phase (a tap in, a long pull out), an
+  optional soft tone per phase, and a struck singing bowl to open and close a
+  session, at four volume levels; silent in Quiet Time or with the watch's
+  speaker muted.
 • An optional daily reminder that opens Cairn — skipped once you have
   breathed that day.
 • Your streak in the app list; on the Pebble Time 2 the colour backlight

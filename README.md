@@ -39,13 +39,14 @@ purpose — a stray hand should not interrupt your breathing.
 - **Session lengths** of 1, 2, 3, 5, 10 or 15 minutes.
 - **The tide is the guide:** the waterline rises through the inhale and falls
   through the exhale, with the phase name and a countdown above it. Optional
-  haptic pulses on every phase change — a nudge to breathe in, a double tick to
-  hold, a longer pull to breathe out — so the rhythm can be followed with your
-  eyes closed. Sound, at four volume levels, marks the app opening and the end
-  of a session with a singing bowl, and every phase change: a warm tone
-  rising with the inhale, one small bell for a hold, the tone drawing back on
-  the exhale. All of these are generated samples (`tools/gen_sfx.py`), not
-  beeps, so they fade in and out instead of clicking.
+  haptic pulses on every phase change — a short tap to breathe in, two light
+  ticks to hold, a long pull to breathe out — so the rhythm can be followed with
+  your eyes closed. Sound, at four volume levels, marks the app opening and the
+  end of a session with a singing bowl. Breath sounds during the session are
+  a separate setting, off by default: a warm tone rising with the inhale, one
+  small bell for a hold, the tone drawing back on the exhale. All of these are
+  generated samples (`tools/gen_sfx.py`), not beeps, so they fade in and out
+  instead of clicking.
 - **A daily reminder**, at a time you pick (Off by default): the watch
   vibrates and strikes a singing bowl, and stays silent if you already
   breathed that day or Quiet Time is on.
