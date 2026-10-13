@@ -3,7 +3,7 @@
 //
 // Run: node tools/test/test_pkjs.js
 //
-// index.js is loaded with stubs for the Pebble runtime (require('pebble-clay'),
+// index.js is loaded with stubs for the Pebble runtime (require('@rebble/clay'),
 // Pebble, localStorage), and the functions under test are pulled out of the
 // module scope by evaluating it in a sandbox.
 
@@ -47,7 +47,7 @@ function loadModule() {
       sendAppMessage: function (msg, ok) { sandbox.lastMessage = msg; if (ok) ok(); },
     },
     require: function (name) {
-      if (name === 'pebble-clay') {
+      if (name === '@rebble/clay') {
         return function Clay() { this.getSettings = function () { return {}; }; };
       }
       if (name === './config.json') return [];

@@ -59,3 +59,6 @@ int32_t sin_lookup(int32_t angle) {
 int32_t cos_lookup(int32_t angle) {
   return (int32_t)(cos((double)angle * 2 * M_PI / TRIG_MAX_ANGLE) * TRIG_MAX_RATIO);
 }
+
+// The reminder module is not under test; settings.c only reschedules it.
+void reminder_schedule(void) {}

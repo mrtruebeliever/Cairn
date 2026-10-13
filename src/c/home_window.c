@@ -307,7 +307,7 @@ static void window_appear(Window *window) {
   backlight_apply();
   HealthServiceAccessibilityMask mask = health_service_metric_accessible(
       HealthMetricHeartRateBPM, time(NULL) - 60, time(NULL));
-  s_hr_possible = (mask & HealthServiceAccessibilityMaskAvailable) != 0;
+  s_hr_possible = HAS_HRM && (mask & HealthServiceAccessibilityMaskAvailable) != 0;
   health_service_events_subscribe(health_handler, NULL);
   health_handler(HealthEventHeartRateUpdate, NULL);
   layer_mark_dirty(s_layer);

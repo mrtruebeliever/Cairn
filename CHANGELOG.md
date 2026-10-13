@@ -13,6 +13,11 @@
 - **The tide keeps moving through every turn.** It used to stand still while a
   phase sound played; without the sound it now runs smooth throughout, and
   with Breath sound on it slows down instead of stopping.
+- **No heart rate where there is no sensor.** The Pebble Round 2 and 2 Duo
+  have no heart-rate sensor, so there the heart, the pulse priming screen, the
+  Heart rate setting, "no heart rate" on the result and the resting heart rate
+  on the progress screen are gone. Deep calm, which needs a measured session,
+  becomes a full ten-minute session on those watches.
 - **Pixel-art cairn and water**, in the style of PebbleDiver and PBL-7: outlined
   pebbles with a highlight and a shadow, stacked a little off-centre, and water
   with drifting glints, a stepped seam into the deep and streaks of light

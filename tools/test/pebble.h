@@ -37,6 +37,9 @@ void persist_write_int(uint32_t key, int32_t value);
 void persist_write_bool(uint32_t key, bool value);
 int persist_write_data(uint32_t key, const void *data, size_t size);
 
+// --- touch (settings.h declares the window's handler) -------------------------
+typedef struct TouchEvent TouchEvent;
+
 // --- i18n --------------------------------------------------------------------
 const char *i18n_get_system_locale(void);
 

@@ -28,6 +28,16 @@
 #define PERSIST_REMINDER        21  // minutes after midnight, -1 = off
 #define PERSIST_PHASE_SOUND     22  // breath sounds during a session
 
+// Only the Pebble Time 2 (emery) has a heart-rate sensor; the Round 2 (gabbro)
+// and the 2 Duo (flint) have none. Without one every heart-rate readout, the
+// pulse priming screen and the Heart rate setting are left out at build time,
+// rather than shown waiting for a reading that can never come.
+#if defined(PBL_PLATFORM_EMERY)
+#define HAS_HRM 1
+#else
+#define HAS_HRM 0
+#endif
+
 // ---------------------------------------------------------------------------
 // Breathing presets. Phase lengths in tenths of a second so 5.5 s fits an int.
 // ---------------------------------------------------------------------------

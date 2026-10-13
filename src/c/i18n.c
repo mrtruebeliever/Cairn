@@ -69,6 +69,7 @@ static const char *TR[NUM_LANGS][NUM_STRS] = {
 
     "Reminder",
     "Breath sound",
+    "A 10-minute session",
   },
 
   [L_NL] = {
@@ -136,6 +137,7 @@ static const char *TR[NUM_LANGS][NUM_STRS] = {
 
     "Herinnering",
     "Ademgeluid",
+    "Sessie van 10 minuten",
   },
 
   [L_FR] = {
@@ -203,6 +205,7 @@ static const char *TR[NUM_LANGS][NUM_STRS] = {
 
     "Rappel",
     "Son du souffle",
+    "Séance de 10 minutes",
   },
 
   [L_DE] = {
@@ -270,6 +273,7 @@ static const char *TR[NUM_LANGS][NUM_STRS] = {
 
     "Erinnerung",
     "Atemklang",
+    "10-Minuten-Sitzung",
   },
 
   [L_ES] = {
@@ -337,6 +341,7 @@ static const char *TR[NUM_LANGS][NUM_STRS] = {
 
     "Recordatorio",
     "Sonido resp.",
+    "Sesión de 10 minutos",
   },
 };
 

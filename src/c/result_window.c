@@ -162,7 +162,8 @@ static void draw_summary(GContext *ctx, GRect b) {
     snprintf(buf, sizeof(buf), "%d bpm", (int)s_res.hr_end);
     graphics_draw_text(ctx, buf, frow, GRect(x, row_y, b.size.w - x - 6, 30),
                        GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
-  } else {
+  } else if (HAS_HRM) {
+    // A watch without a sensor has nothing to apologise for.
     graphics_context_set_text_color(ctx, COL_DIM);
     graphics_draw_text(ctx, S(S_RESULT_NO_HR), f18, GRect(x, row_y + BY_SIZE(6, 2), b.size.w - x - 6, 22),
                        GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);

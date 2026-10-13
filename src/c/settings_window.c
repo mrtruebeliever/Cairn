@@ -13,8 +13,18 @@
 #include "sfx.h"
 #include "stats.h"
 
+// Without a heart-rate sensor the Heart rate row sits past NUM_ROWS, so it is
+// never listed while the code that handles it still compiles.
 enum { ROW_PRESET, ROW_RHYTHM, ROW_LEN, ROW_SOUND, ROW_PHASE_SOUND, ROW_HAPTICS,
-       ROW_BACKLIGHT, ROW_SHOW_HR, ROW_REMINDER, ROW_RESET, NUM_ROWS };
+       ROW_BACKLIGHT,
+#if HAS_HRM
+       ROW_SHOW_HR,
+#endif
+       ROW_REMINDER, ROW_RESET, NUM_ROWS,
+#if !HAS_HRM
+       ROW_SHOW_HR,
+#endif
+};
 
 // The rows follow the watch's text size (Settings -> Display), one step either
 // side of its default -- Gothic 24 on the 228px screens, 18 on the compact one.

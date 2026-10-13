@@ -93,10 +93,16 @@ static void insights_update(Layer *layer, GContext *ctx) {
 
   draw_row(ctx, ROW_Y0, S(S_IN_CALM), s_trend.score_7, s_trend.score_30,
            s_trend.dir_score, true, COL_ACCENT);
+#if HAS_HRM
   draw_row(ctx, ROW_Y0 + ROW_PITCH, S(S_IN_RESTHR), s_trend.hr_7, s_trend.hr_30,
            s_trend.dir_hr, true, COL_HR);
+  const int16_t streak_y = ROW_Y0 + 2 * ROW_PITCH;
+#else
+  // No sensor, no resting heart rate: the streak moves up into its row.
+  const int16_t streak_y = ROW_Y0 + ROW_PITCH;
+#endif
   // A streak is a single number: the 30-day column stays empty.
-  draw_row(ctx, ROW_Y0 + 2 * ROW_PITCH, S(S_IN_STREAK), s_trend.streak, -1, 0, false, COL_VALUE);
+  draw_row(ctx, streak_y, S(S_IN_STREAK), s_trend.streak, -1, 0, false, COL_VALUE);
 
   graphics_draw_line(ctx, GPoint(LBL_X, TABLE_END), GPoint(b.size.w - LBL_X, TABLE_END));
 

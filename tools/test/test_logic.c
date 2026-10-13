@@ -112,7 +112,13 @@ static void test_session_tips(void) {
 
   SessionResult n = r;
   n.has_hr = false;
+#if HAS_HRM
   CHECK_EQ(insights_session_tip(&n), S_TIP_NOHR, "no HR beats every HR rule");
+#else
+  CHECK_EQ(insights_session_tip(&n), S_TIP_LONG_DONE, "no sensor: no tighten-the-strap tip");
+  n.completion = 40;
+  CHECK_EQ(insights_session_tip(&n), S_TIP_SHORT, "no sensor: stopped early");
+#endif
 
   n = r; n.hr_end = (uint8_t)(n.hr_start + 5);
   CHECK_EQ(insights_session_tip(&n), S_TIP_HR_UP, "HR climbed");
@@ -201,9 +207,21 @@ static void test_badges(void) {
   fresh = stats_record(&r, &best);
   CHECK_EQ(fresh, 0, "no repeat unlocks");
 
+#if HAS_HRM
   SessionRecord hi = mk(0, 92, 70, 100, PRESET_COHERENT);
   fresh = stats_record(&hi, &best);
   CHECK(fresh & (1u << BADGE_DEEP), "score 92 unlocks Deep calm");
+#else
+  // No sensor: Deep calm is a full ten-minute session instead.
+  SessionRecord ten = mk(0, 90, 0, 100, PRESET_COHERENT);
+  ten.dur_s = 9 * 60;
+  fresh = stats_record(&ten, &best);
+  CHECK(!(fresh & (1u << BADGE_DEEP)), "no sensor: nine minutes is not enough");
+  ten.dur_s = 10 * 60;
+  fresh = stats_record(&ten, &best);
+  CHECK(fresh & (1u << BADGE_DEEP), "no sensor: ten minutes unlocks Deep calm");
+  CHECK_EQ(strcmp(badge_desc(BADGE_DEEP), "A 10-minute session"), 0, "no sensor: Deep calm says so");
+#endif
 
   reset_all();
   g_stats.last_date = (int32_t)ymd_offset(1);

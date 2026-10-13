@@ -1,7 +1,9 @@
 # Cairn
 
 A guided breathing coach with live heart rate for the Pebble Time 2 (emery), also
-built for the Pebble Round 2 (gabbro) and Pebble 2 Duo (flint).
+built for the Pebble Round 2 (gabbro) and Pebble 2 Duo (flint). Those two have no
+heart-rate sensor, so there Cairn leaves every heart-rate readout out and the
+calm score rests on completion alone.
 
 Breathe with the tide: **inhale and the water rises, exhale and it falls**,
 uncovering a cairn of stones on the shore. Every finished session lays another

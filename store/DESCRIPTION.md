@@ -10,8 +10,8 @@ A guided breathing coach with live heart rate. Inhale and the water rises, exhal
 Cairn turns a breathing exercise into a tide. Start a session and the waterline
 rises while you inhale and falls while you exhale, uncovering a cairn of stones
 on the shore — no counting, no timer to stare at, just a rhythm to follow. A
-pulse on your wrist marks every phase change — a nudge to breathe in, a double
-tick to hold, a longer pull to breathe out — so you can follow the rhythm with
+pulse on your wrist marks every phase change — a short tap to breathe in, two
+light ticks to hold, a long pull to breathe out — so you can follow the rhythm with
 your eyes closed.
 
 While you breathe, the watch reads your heart rate every second. Afterwards you
@@ -31,8 +31,9 @@ FEATURES
 • Four patterns: Coherent (5.5 s in / 5.5 s out), Box, 4-7-8, and a Custom
   rhythm you set in half-second steps.
 • Sessions of 1, 2, 3, 5, 10 or 15 minutes.
-• Live heart rate, sampled every second, with a priming screen so the starting
-  reading is a real baseline.
+• Live heart rate on the Pebble Time 2, sampled every second, with a priming
+  screen so the starting reading is a real baseline. The Round 2 and 2 Duo
+  have no heart-rate sensor; there the heart-rate parts stay out of sight.
 • A calm score from completion, heart-rate drop, breath-linked heart-rate
   swing and — where the watch supports it — real heart rate variability
   (RMSSD), with an honest fallback when there is no reading at all.

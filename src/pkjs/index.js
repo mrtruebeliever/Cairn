@@ -1,6 +1,19 @@
 var Clay = require('@rebble/clay');
 var clayConfig = require('./config.json');
-var clay = new Clay(clayConfig);
+// Only the Pebble Time 2 (emery) has a heart-rate sensor, so elsewhere the
+// "show heart rate" toggle is hidden (the watch leaves the readouts out at build
+// time). Clay runs this function inside the settings page, on its own: it can
+// see nothing from this file.
+var clay = new Clay(clayConfig, function () {
+  var cfg = this;
+  cfg.on(cfg.EVENTS.AFTER_BUILD, function () {
+    var info = cfg.meta.activeWatchInfo;
+    if (info && info.platform && info.platform !== 'emery') {
+      var item = cfg.getItemByMessageKey('SHOW_HR');
+      if (item) item.hide();
+    }
+  });
+});
 
 // The phone keeps the long history the watch has no room for (the watch stores
 // only the last 20 sessions) and computes the 7/30-day trends from it. The

@@ -126,8 +126,11 @@ uint32_t stats_record(const SessionRecord *rec, bool *out_new_best) {
     [BADGE_STEADY]  = g_stats.streak >= 3,
     [BADGE_ZENWEEK] = g_stats.streak >= 7,
     // Deep calm needs a measured session: without a heart rate the score is
-    // capped at 90, so an unmeasured full session would otherwise earn it.
-    [BADGE_DEEP]    = rec->score >= 90 && rec->hr_start != 0,
+    // capped at 90, so an unmeasured full session would otherwise earn it. A
+    // watch without a sensor can never measure one, so there it is a full
+    // session of ten minutes or more instead.
+    [BADGE_DEEP]    = HAS_HRM ? rec->score >= 90 && rec->hr_start != 0
+                              : rec->dur_s >= 10 * 60 - 5,
     [BADGE_CENTURY] = g_stats.total_sessions >= 100,
     [BADGE_TIDE]    = g_stats.total_minutes >= 1000,
   };
@@ -163,7 +166,7 @@ const char *badge_name(int badge) {
 const char *badge_desc(int badge) {
   static const int ids[NUM_BADGES] = {
     S_BADGE_FIRST_D, S_BADGE_STEADY_D, S_BADGE_ZENWEEK_D,
-    S_BADGE_DEEP_D, S_BADGE_CENTURY_D, S_BADGE_TIDE_D,
+    HAS_HRM ? S_BADGE_DEEP_D : S_BADGE_DEEP_D_NOHR, S_BADGE_CENTURY_D, S_BADGE_TIDE_D,
   };
   if (badge < 0 || badge >= NUM_BADGES) return "";
   return S(ids[badge]);

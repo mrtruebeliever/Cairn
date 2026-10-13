@@ -45,7 +45,9 @@ uint8_t insights_score(const SessionResult *r) {
 // available.
 int insights_session_tip(const SessionResult *r) {
   if (r->new_best)                              return S_TIP_BEST;
-  if (!r->has_hr)                               return S_TIP_NOHR;
+  // "Wear the watch tighter" only helps on a watch that has a sensor.
+  if (!r->has_hr) return HAS_HRM ? S_TIP_NOHR
+                       : r->completion < 60 ? S_TIP_SHORT : S_TIP_LONG_DONE;
   if (r->hr_end > r->hr_start + 3)              return S_TIP_HR_UP;
   if (r->hr_start > 90)                         return S_TIP_HR_HIGH;
   if (r->hr_drop >= 6)                          return S_TIP_BIGDROP;

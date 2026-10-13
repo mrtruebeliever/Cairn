@@ -118,6 +118,7 @@ static void close_cycle(void) {
 // True when the watch can actually report a heart rate at all. False in the
 // emulator, which is what drives every graceful-degradation path in the app.
 static bool hr_accessible(void) {
+  if (!HAS_HRM) return false;
   HealthServiceAccessibilityMask mask = health_service_metric_accessible(
       HealthMetricHeartRateBPM, time(NULL) - 60, time(NULL));
   return (mask & HealthServiceAccessibilityMaskAvailable) != 0;
@@ -694,8 +695,9 @@ static void health_handler(HealthEventType event, void *context) {
 #define HR_SAMPLE_INTERVAL_S 1
 
 void hr_sampling_apply(void) {
-  health_service_set_heart_rate_sample_period(g_set.show_hr ? HR_SAMPLE_INTERVAL_S : 0);
-  health_service_set_hrv_sample_period(g_set.show_hr ? HR_SAMPLE_INTERVAL_S : 0);
+  bool on = HAS_HRM && g_set.show_hr;
+  health_service_set_heart_rate_sample_period(on ? HR_SAMPLE_INTERVAL_S : 0);
+  health_service_set_hrv_sample_period(on ? HR_SAMPLE_INTERVAL_S : 0);
 }
 
 void session_window_push(void) {
